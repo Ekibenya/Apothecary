@@ -4,7 +4,8 @@
 set -e
 cd "$(dirname "$0")/.."
 VER="${1:-1}"
-export ROMA_LINE=luzhi ROMA_CARD_BASE=luzhi ROMA_VER="$VER" ROMA_TITLE=四丈之内
+export ROMA_LINE=luzhi ROMA_CARD_BASE=luzhi ROMA_VER="$VER" ROMA_TITLE=雀斑之下
+export ROMA_CDN=https://cdn.jsdelivr.net/gh/ekibenya/apothecary@main/
 
 python3 tools/cardbuild.py
 python3 tools/stcard.py
