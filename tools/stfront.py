@@ -34,6 +34,9 @@ PACKMAP = {
 
 
 def xor_key():
+    # 三维引擎退役后 ENG 不复存在；密钥只服务资材包，包也一并退役，空串即可。
+    if not os.path.exists(ENG):
+        return ''
     s = io.open(ENG, encoding='utf-8', errors='ignore').read()
     return re.search(r"var K\s*=\s*'([^']+)'", s).group(1)
 
@@ -57,11 +60,14 @@ def pack_order(path, K):
 def main():
     os.makedirs(OUT, exist_ok=True)
     K = xor_key()
-    mani = json.load(io.open(MANI, encoding='utf-8'))
+    mani = (json.load(io.open(MANI, encoding='utf-8'))
+            if os.path.exists(MANI) else {'chunks': {}})
 
     pm = {}
     for frag, spec in PACKMAP.items():
         src = os.path.join(ROOT, 'core/res/data', frag)
+        if not os.path.exists(src):
+            continue          # 资材包已随三维退役
         # 只留 manifest 里真实存在的块（desert 等可选块未构建时自动剔除）
         cks = [c for c in spec['chunks'] if c in mani['chunks']]
         pm[frag] = {'chunks': cks, 'order': pack_order(src, K)}
@@ -88,12 +94,25 @@ def main():
     png_assets = os.environ.get('ROMA_PNG_ASSETS', '0') == '1' and not no3d
 
     doc = io.open(DOC, encoding='utf-8').read()
+    # 绘卷立绘自包含：CHR_DATA 里的 'CH/x.webp' 出卡时换成 data URI；仓库态仍走相对路径。
+    def _sprite_inline(txt):
+        import base64 as _b64
+        chdir = 'core/vendor/three/build/chunks/c8a17e42/'
+        def rep(m):
+            p = os.path.join(ROOT, chdir + m.group(1))
+            if not os.path.exists(p):
+                return m.group(0)
+            return "'data:image/webp;base64," + _b64.b64encode(
+                io.open(p, 'rb').read()).decode('ascii') + "'"
+        return re.sub(r"'CH/([\w]+\.webp)'", rep, txt)
+    doc = _sprite_inline(doc)
     boot = io.open(os.path.join(OUT, 'boot.js'), encoding='utf-8').read()
 
     ENG_FILES = ['core/three-bundle.min.js',
                  'core/vendor/three/build/chunks/9d717bc0/36411d0a880f.js',
                  'core/vendor/three/build/chunks/9d717bc0/1aa613ec934b.js',
                  'core/vendor/three/build/chunks/9d717bc0/8e2ad10c77b4.js']
+    ENG_FILES = [f for f in ENG_FILES if os.path.exists(os.path.join(ROOT, f))]
     if no3d or png_assets:
         cfg['engs'] = [os.path.basename(f) for f in ENG_FILES]
     if no3d:
@@ -391,7 +410,7 @@ def main():
             #   modern.dat（9.2MB）：东京／纽约／大阪的现代粒子沙盘，1800 年以后才够得着，
             #     对 1177—1258 的本卡是个附赠件。标准版拿它换中原包的位置
             #     （ROMA_SKIP_MODERN=1），完全版两块都带。
-            pack_files = [fn2 for fn2 in sorted(os.listdir(pdir))
+            pack_files = [] if not os.path.isdir(pdir) else [fn2 for fn2 in sorted(os.listdir(pdir))
                           if fn2.endswith('.dat')
                           and (fn2 != 'zhou.dat' or embed_zhou)
                           and (fn2 != 'modern.dat' or not skip_modern)]
