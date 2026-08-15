@@ -1156,11 +1156,15 @@ button:focus-visible,.go:focus-visible{outline:1px solid var(--gold);outline-off
 #pnTx #modScene3D{background:rgba(3,3,3,.72) !important}
 /* ── 绘卷（立绘影像层）：黑绢底、金字地名、立绘画布 ── */
 #vnIsle{position:absolute;inset:0;overflow:hidden}
-#vnWash{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 8%,rgba(52,40,16,.55),rgba(8,7,5,.92) 62%,#060505 100%);transition:background 1.2s ease}
-#vnIsle.wNight #vnWash{background:radial-gradient(120% 90% at 50% 6%,rgba(20,28,48,.6),rgba(5,6,10,.94) 60%,#040406 100%)}
-#vnIsle.wRed #vnWash{background:radial-gradient(120% 90% at 50% 8%,rgba(64,18,20,.58),rgba(12,5,6,.93) 62%,#070404 100%)}
-#vnIsle.wGreen #vnWash{background:radial-gradient(120% 90% at 50% 8%,rgba(24,44,24,.5),rgba(6,9,6,.93) 62%,#040604 100%)}
-#vnIsle.wWild #vnWash{background:radial-gradient(120% 90% at 50% 8%,rgba(34,40,36,.5),rgba(7,8,8,.93) 62%,#050606 100%)}
+#vnIsle{background:#080706}
+#vnBgA,#vnBgB{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity 1.1s ease}
+/* 罩子：上下压边 + 一层随景别调的极淡色调。背景本身是美术板，不再由它画底。 */
+#vnWash{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.34),rgba(0,0,0,.06) 26%,rgba(0,0,0,.08) 62%,rgba(0,0,0,.46));
+  box-shadow:inset 0 0 90px rgba(0,0,0,.55);transition:background 1.2s ease}
+#vnIsle.wNight #vnWash{background:linear-gradient(180deg,rgba(6,10,26,.5),rgba(6,10,26,.14) 30%,rgba(4,6,16,.2) 64%,rgba(2,3,8,.56))}
+#vnIsle.wRed #vnWash{background:linear-gradient(180deg,rgba(38,8,8,.44),rgba(40,10,8,.1) 28%,rgba(24,6,6,.16) 64%,rgba(12,3,3,.5))}
 #vnCast{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 #vnCast canvas{position:absolute;transform:translate(-50%,0);opacity:1;filter:drop-shadow(0 6px 18px rgba(0,0,0,.65));transition:opacity .8s ease,left .9s cubic-bezier(.3,.1,.25,1),transform .8s ease,height .9s cubic-bezier(.3,.1,.25,1),top .9s cubic-bezier(.3,.1,.25,1)}
 #vnLoc{position:absolute;top:10px;right:12px;writing-mode:vertical-rl;letter-spacing:.34em;font-family:var(--serif,serif);font-size:13px;color:rgba(201,155,63,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);pointer-events:none;max-height:70%;overflow:hidden}
@@ -1718,11 +1722,11 @@ html.lux #pnTx #zjScene3D>canvas,html.lux #pnTx #mdScene3D>canvas,html.lux #pnTx
       <span class="t">装备</span></div>
   </div>
 
-  <div id="pnTx"><div id="vnIsle"><div id="vnWash"></div><div id="vnCast"></div><div id="vnLoc"></div></div>
+  <div id="pnTx"><div id="vnIsle"><img id="vnBgA" alt=""><img id="vnBgB" alt=""><div id="vnWash"></div><div id="vnCast"></div><div id="vnLoc"></div></div>
     <div id="txHint"></div>
   </div>
   <div class="g3dRail">
-    <div class="gArr" id="arr3d" title="绘卷　点一下换一档：默认 → 放大 → 全屏 → 收起">
+    <div class="gArr" id="arr3d" title="绘卷　点一下换一档：默认 → 放大 → 收起">
       <div class="win"><canvas class="m3d" width="128" height="88"></canvas></div>
       <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2.6 21 7.4v9.2L12 21.4 3 16.6V7.4z"/><path d="M3 7.4l9 4.8 9-4.8M12 12.2v9.2"/></svg></div>
       <span class="t">绘卷</span></div>
@@ -10019,8 +10023,6 @@ var CHR_DATA=[
 {slug:'aduo',zh:'阿多妃',aliases:['阿多'],file:'CH/aduo_s1.webp',hf:0.97},
 {slug:'cuiling',zh:'翠苓',aliases:['翠苓'],file:'CH/cuiling_s1.webp',hf:0.95}
 ];
-(function(){for(var i=0;i<CHR_DATA.length;i++){var c=CHR_DATA[i];
-  if(c.file)c.file=c.file.replace('CH/','core/vendor/three/build/chunks/c8a17e42/');if(c.face)c.face=c.face.replace('CH/','core/vendor/three/build/chunks/c8a17e42/');}})();
 var CHR_IDX=[];
 (function(){CHR_DATA.forEach(function(c){c.aliases.forEach(function(k){CHR_IDX.push({k:k,c:c});});});
 CHR_IDX.sort(function(a,b){return b.k.length-a.k.length;});})();
@@ -10053,7 +10055,7 @@ function pixelReveal(cv,img){
   raf_(fr);
 }
 function vnFrame(){var g=document.getElementById('game');if(!g)return 'S';
-  return g.classList.contains('txBig')?'F':(g.classList.contains('tx2')?'B':'S');}
+  return g.classList.contains('tx2')?'B':'S';}   /* 全屏档已取消，只剩两种取景 */
 function vnCastSize(el){ /* 取景：默认=上半身裁切；放大=及膝；全屏=全身。hf 抹平作画框身高差。 */
   var f=vnFrame(),hf=(el._c&&el._c.hf)||1;
   if(el._cnt>=4)hf*=0.92;
@@ -10094,13 +10096,86 @@ function vnPovSlug(){ /* 开局 era 里的「扮演·X」→ 该角色立绘常�
   try{var era=String((GAME.op&&GAME.op.era)||'');var i=era.indexOf('扮演·');
     if(i<0)return null;var c=chrOf(era.slice(i+3,i+12));return c?c.slug:null;}catch(e){return null;}
 }
+/* 背景库：35 张美术背景板。择景按 ◇时地 里的地名／时辰打分，
+   分不出高下就落到兜底那张；时地文本不变就不换图（滞回，防每回合闪）。
+   t:'n' 夜景、'd' 日景、'' 室内不分昼夜——错配要扣分，宁可退到兜底也不放白天的院子进子夜。 */
+var SCENEBG=[
+{f:'CH/bg41.webp',t:'d',k:['村','里','民家','巷','土墙','屋舍','镇','老家']},
+{f:'CH/bg42.webp',t:'d',k:['街','市','坊','闹市','铺','摊','集']},
+{f:'CH/bg43.webp',t:'d',k:['绿青馆','妓馆','青楼','花街','馆前','烟花']},
+{f:'CH/bg44.webp',t:'d',k:['草地','苑','花圃','绿地','后园']},
+{f:'CH/bg45.webp',t:'d',k:['药田','药圃','田','圃','草坡','荒地','野地','土丘']},
+{f:'CH/bg46.webp',t:'d',k:['宫门','城门','门前','门房','角门','门口']},
+{f:'CH/bg47.webp',t:'',k:['都','京','城中','黄昏','日暮','夕阳','暮色']},
+{f:'CH/bg48.webp',t:'n',k:['廊下','檐下','夜廊','阶下']},
+{f:'CH/bg49.webp',t:'d',k:['后宫','宫城','全景','四夫人','宫苑']},
+{f:'CH/bg50.webp',t:'d',k:['屋顶','檐','瓦上','房上']},
+{f:'CH/bg51.webp',t:'d',k:['院','庭院','广场','前庭','中院','天井']},
+{f:'CH/bg52.webp',t:'d',k:['宫墙','墙根','回廊','长廊']},
+{f:'CH/bg53.webp',t:'d',k:['下女','洗衣','浣衣','局','司','舍','杂役','织房']},
+{f:'CH/bg54.webp',t:'d',k:['大殿','正殿','朝堂','殿前','太极']},
+{f:'CH/bg55.webp',t:'',k:['楼内','大厅','厅上','楼上','阁']},
+{f:'CH/bg56.webp',t:'n',k:['殿','宫内','内殿']},
+{f:'CH/bg57.webp',t:'n',k:['月','中庭','庭前','院','夜色']},
+{f:'CH/bg58.webp',t:'d',k:['远景','山','城外','望']},
+{f:'CH/bg59.webp',t:'d',k:['宫','殿','翡翠宫','水晶宫','金刚宫','石榴宫']},
+{f:'CH/bg60.webp',t:'d',k:['廊','墙','外廷','石阶','露台']},
+{f:'CH/bg61.webp',t:'n',k:['廊','殿','灯下','阶']},
+{f:'CH/bg62.webp',t:'d',k:['外廷','官署','衙','军府','公廨','校场']},
+{f:'CH/bg63.webp',t:'',k:['库','仓','地窖','酒','暗处','杂物']},
+{f:'CH/bg64.webp',t:'',k:['轩','内廊','偏殿','侧间','耳房']},
+{f:'CH/bg65.webp',t:'',k:['楼','厅','客栈','酒肆','茶楼']},
+{f:'CH/bg66.webp',t:'',k:['药房','药铺','医局','诊疗','药柜','药室','医馆','尚药']},
+{f:'CH/bg67.webp',t:'',k:['灶','厨','尚食','膳','蒸','伙房','水房']},
+{f:'CH/bg68.webp',t:'',k:['房','室','寝','屋里','内室','榻','卧','书房']},
+{f:'CH/bg69.webp',t:'n',k:['深夜','暗夜','三更','四更','子夜']},
+{f:'CH/bg70.webp',t:'n',k:['牢','暗室','库房','地牢','禁室','关着']},
+{f:'CH/bg71.webp',t:'',k:['廊','过道','走廊']},
+{f:'CH/bg72.webp',t:'',k:['宴','酒席','筵','席上','怪谈','夜宴']},
+{f:'CH/bg73.webp',t:'d',k:['秋','落叶','枫','桂','金桂']},
+{f:'CH/bg74.webp',t:'n',k:['庭园','园','花园','池','水边']},
+{f:'CH/bg75.webp',t:'d',k:['园游会','帐','观礼','花宴','春','桃','杏','梅']}
+];
+
+(function(){var D='core/vendor/three/build/chunks/c8a17e42/';
+function rp(v){return (v&&v.slice(0,3)==='CH/')?D+v.slice(3):v;}
+for(var i=0;i<CHR_DATA.length;i++){var c=CHR_DATA[i];c.file=rp(c.file);if(c.face)c.face=rp(c.face);}
+for(i=0;i<SCENEBG.length;i++)SCENEBG[i].f=rp(SCENEBG[i].f);})();
+var RX_NIGHT=/夜|亥|子时|丑时|寅时|三更|四更|五更|深夜|入夜|月|烛|灯下|安寝|就寝/;
+var RX_DAY=/辰时|巳时|午|未时|申时|晨|朝|白日|正午|日头|晌午|清早|黎明/;
+function bgPick(loc){
+  var night=RX_NIGHT.test(loc)&&!RX_DAY.test(loc);
+  var best=null,bs=0;
+  for(var i=0;i<SCENEBG.length;i++){
+    var c=SCENEBG[i],sc=0;
+    for(var j=0;j<c.k.length;j++)if(loc.indexOf(c.k[j])>=0)sc+=c.k[j].length*2;
+    if(sc>0){
+      if(c.t==='n')sc+=night?6:-8;
+      else if(c.t==='d')sc+=night?-8:2;
+    }
+    if(sc>bs){bs=sc;best=c;}
+  }
+  if(best)return best.f;
+  return night?SCENEBG[16].f:SCENEBG[10].f;   /* 兜底：夜＝月夜中庭，昼＝宫院 */
+}
+var bgFlip=false;
 function vnWash(loc){
   var isle=document.getElementById('vnIsle');if(!isle)return;
   isle.className='';
-  if(/夜|雪|冬|子时|亥时|三更/.test(loc))isle.classList.add('wNight');
+  if(RX_NIGHT.test(loc)&&!RX_DAY.test(loc))isle.classList.add('wNight');
   else if(/花街|绿青馆|妓|青楼/.test(loc))isle.classList.add('wRed');
-  else if(/药田|药圃|园圃|庭园|林|草/.test(loc))isle.classList.add('wGreen');
-  else if(/狩场|离宫|山|砦|瀑|洞|野|营/.test(loc))isle.classList.add('wWild');
+  /* 双层交叉淡入：新图挂在背面那一层，等它自己解好码再互换透明度，
+     省得换图瞬间闪一记白。 */
+  var src=bgPick(loc);
+  var a=document.getElementById('vnBgA'),b=document.getElementById('vnBgB');
+  if(a&&b&&src){
+    var show=bgFlip?a:b,hide=bgFlip?b:a;bgFlip=!bgFlip;
+    if(show.getAttribute('src')!==src){
+      var im=new Image();
+      im.onload=function(){show.src=src;show.style.opacity=1;hide.style.opacity=0;};
+      im.src=src;
+    }else{show.style.opacity=1;hide.style.opacity=0;}
+  }
   var el=document.getElementById('vnLoc');
   if(el)el.textContent=loc.replace(/\s+/g,' ').slice(0,24);
 }
@@ -10317,7 +10392,7 @@ function medEdictSync(){ /* 环海侧 sec_deed 敕令：同 edictSync，落到 M
 (function(){
   var ar=document.getElementById('arr3d');
   if(ar){
-    /* 三维画面四档循环：默认 → 放大 → 全屏 → 收起 → 默认…
+    /* 绘卷三档循环：默认 → 放大 → 收起 → 默认…
        原来是展开／收起两个钮各管一头，现在全交给左上角那一枚台前调度小窗，
        点一下走一档。四档正好绕一圈，点过头再点三下就回来，不会卡死在某一端。 */
     /* 档位要写给「当前这条线用的那台引擎」。写死 MED3D 是个哑 bug：
@@ -10335,11 +10410,13 @@ function medEdictSync(){ /* 环海侧 sec_deed 敕令：同 edictSync，落到 M
         if(_t0>=0&&_t0<=2)TIER=_t0;}catch(_){}
     function tierNow(){
       var E=eng();
-      if(E&&E.tier!=null)TIER=Math.max(0,Math.min(2,E.tier|0));
+      if(E&&E.tier!=null)TIER=Math.max(0,Math.min(1,E.tier|0));
       return TIER;
     }
     function setTier(tt){
-      TIER=Math.max(0,Math.min(2,tt|0));
+      /* 全屏档已取消：背景板是横幅美术，竖着铺满整屏会把两头裁掉。
+         三档循环——默认 → 放大 → 收起。 */
+      TIER=Math.max(0,Math.min(1,tt|0));
       var E=eng();
       if(E){E.tier=TIER;E.expanded=TIER>0;}
       try{localStorage.setItem('med3d_tier',String(TIER));
@@ -10349,7 +10426,7 @@ function medEdictSync(){ /* 环海侧 sec_deed 敕令：同 edictSync，落到 M
       var g=document.getElementById('game'),tr=tierNow();
       g.classList.toggle('txOpen',GAME.txOpen);
       g.classList.toggle('tx2',GAME.txOpen&&tr===1);
-      g.classList.toggle('txBig',GAME.txOpen&&tr===2);
+      g.classList.remove('txBig');
       /* 单臂：每个入口(渲染/缩放/点击/心跳)从前都会各自起一条 480ms 独立链，
          回合越多链越多，同一份工作被跑 N 遍——旧链还把死文档钉着。 */
       if(GAME.txOpen&&LIVE){if(_TICK_T)clearTimeout(_TICK_T);_TICK_T=tmo(zj3dTick,480);}
@@ -10359,8 +10436,8 @@ function medEdictSync(){ /* 环海侧 sec_deed 敕令：同 edictSync，落到 M
     function cycle(){
       var E=eng();
       if(!GAME.txOpen){ GAME.txOpen=true; setTier(0); if(E&&E.wake)E.wake(); }
-      else if(tierNow()<2){ setTier(tierNow()+1); }
-      else{                                          /* 已全屏：这一下是收起 */
+      else if(tierNow()<1){ setTier(tierNow()+1); }
+      else{                                          /* 已放大：这一下是收起 */
         GAME.txOpen=false; setTier(0);
         try{if(window.MED3D&&MED3D.sleep)MED3D.sleep();}catch(_){}
         try{if(window.ZJ3D&&ZJ3D.sleep)ZJ3D.sleep();}catch(_){}
