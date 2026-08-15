@@ -185,23 +185,15 @@ canvas{display:block}
 #intro{position:fixed;inset:0;z-index:60;background:var(--ink);opacity:1;
        transition:opacity .8s ease;cursor:pointer}
 #introCv{position:absolute;inset:0;width:100%;height:100%}
-#intro .iEyebrow{position:absolute;left:50%;top:24%;transform:translateX(-50%);
-       font-size:10px;letter-spacing:.52em;color:var(--mut);white-space:nowrap;
-       opacity:0;transition:opacity .7s ease}
-#intro .iSub{position:absolute;left:50%;top:58%;transform:translateX(-50%);
-       font-size:10px;letter-spacing:.34em;color:#8a8a84;white-space:nowrap;
-       opacity:0;transition:opacity .7s ease}
+
+
 #intro .iBtn{position:absolute;left:50%;top:66%;transform:translateX(-50%);
        border:1px solid rgba(236,236,232,.35);padding:11px 40px 9px;
        font-size:11px;letter-spacing:.44em;color:var(--txt);
        opacity:0;transition:opacity .7s ease,border-color .2s,color .2s}
 #intro .iBtn:hover{border-color:var(--gold);color:var(--gold-hi)}
-#intro .iFoot{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);
-       font-size:9px;letter-spacing:.4em;color:#4a4a44;white-space:nowrap;
-       opacity:0;transition:opacity .7s ease}
-#intro.p1 .iEyebrow{opacity:1}
-#intro.p2 .iSub{opacity:1}
-#intro.p3 .iBtn,#intro.p3 .iFoot{opacity:1}
+
+#intro.p3 .iBtn{opacity:1}   /* 片头只剩粒子片名与那颗按钮 */
 
 /* ---------- engage overlay ---------- */
 #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:90}
@@ -1623,11 +1615,8 @@ html.lux #pnTx #zjScene3D>canvas,html.lux #pnTx #mdScene3D>canvas,html.lux #pnTx
 
 <div id="intro">
   <canvas id="introCv"></canvas>
-  <div class="iEyebrow">─&nbsp;&nbsp;薬屋のひとりごと&nbsp;&nbsp;─</div>
-  <div class="iSub">後宮&nbsp;·&nbsp;毒与藥&nbsp;·&nbsp;十二局</div>
   <div class="iBtn" id="iBtn" tabindex="0">INTRARE</div>
-  <div class="iFoot">御极七年–九年&nbsp;·&nbsp;茘国后宫</div>
-</div>
+  </div>
 
 <div id="game">
   <canvas id="gTerr"></canvas>
