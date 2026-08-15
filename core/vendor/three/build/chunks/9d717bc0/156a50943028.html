@@ -4008,7 +4008,7 @@ function menuDraw(){
   var sway=REDUCED?0:Math.sin(mt*.000082)*.15;
   var yaw=.34+sway,cyw=Math.cos(yaw),syw=Math.sin(yaw);
   var tl=.62,ctl=Math.cos(tl),stl=Math.sin(tl);          /* 俯角压平些：看得见格局，屋顶也还留得住剪影 */
-  var S=mH*.70,cx=mW*.50-PX*mW*.011,cyc=mH*.62-PY*mH*.011;
+  var S=mH*.60,cx=mW*.50-PX*mW*.011,cyc=mH*.56-PY*mH*.011;
   miEl.style.translate=(PX*34)+'px '+(PY*22)+'px';       /* options: nearest layer, moves most */
   mfEl.style.translate=(PX*12)+'px '+(PY*8)+'px';
   mg.clearRect(0,0,mW,mH);
@@ -4016,13 +4016,19 @@ function menuDraw(){
      背后印个圆就像贴错的月亮。暖意交给粒子自己的亮度分层。 */
   /* 一万多个点，逐点拼 rgba 字符串是 WebKit 上的死穴（地球那会儿栽过一次）。
      照旧走分桶：透明度量化成 32 档，同桶一次 fill。 */
+  /* 立体感全在这一步：透视除法，跟选开局那些卡一模一样的算法。
+     先前写的是正交投影——远近一样大，所以怎么调都是一张等距图，没有纵深。
+     per 近大远小，位置、点径、亮度三样一起跟着走，城才有进深。 */
+  var FCF=2.55;
   for(var i=0;i<FCPTS.length;i++){
     var p=FCPTS[i];
     var Xr=p.x*cyw+p.z*syw,Zr=-p.x*syw+p.z*cyw;
-    var sxp=cx+Xr*S,syp=cyc-(p.y*ctl+Zr*stl)*S;
-    var dep=.70-Zr*.38;                                  /* 越往北越远，越淡；底子留住，不然后半座全黑 */
-    var a=Math.max(.10,Math.min(.94,dep*p.b));
-    var sz2=(p.c===1?1.22:1.02)*DPR*(.78+.44*dep);
+    var V=p.y*ctl+Zr*stl;                                /* 屏幕竖向 */
+    var Dp=Zr*ctl-p.y*stl;                               /* 离镜头多远 */
+    var per=FCF/(FCF+Dp);
+    var sxp=cx+Xr*S*per,syp=cyc-V*S*per;
+    var a=Math.max(.12,Math.min(.95,(.34+(per-.82)*1.20)*p.b));
+    var sz2=(p.c===1?1.30:1.08)*per*DPR*.74;
     GB_push(p.c,(a*GB_N)|0,sxp,syp,sz2,sz2);
   }
   GB_flush(mg);
