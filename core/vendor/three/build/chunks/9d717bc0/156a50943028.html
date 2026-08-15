@@ -340,12 +340,11 @@ canvas{display:block}
    整站一次反色＋色相回正（黑金 → 白金），三维画面与图片再反一次保持原貌。
    全卡内联颜色数以百计，逐处重配不现实；这条滤镜路是黑白模式的标准做法。
    html 高度即视口（overflow hidden），filter 形成的包含块不影响 fixed 布局。 */
-html.lux{filter:invert(1) hue-rotate(180deg);color-scheme:light}
-html.lux #zjScene3D canvas,html.lux #mdScene3D canvas,html.lux img{filter:invert(1) hue-rotate(180deg)}
+
+
 /* 反色出来的近纯白太刺眼：正片叠底罩一层暖纸色，白压成米黄羊皮纸面，
    深色文字几乎不动（对比度不丢）；压在一切弹窗之上，全站统一。 */
-html.lux::after{content:'';position:fixed;inset:0;z-index:2147483647;pointer-events:none;
-  background:#faf7f0;mix-blend-mode:multiply}
+
 #luxTg{position:absolute;top:16px;right:18px;z-index:60;cursor:pointer;font-size:16px;line-height:1;
   padding:8px 11px;border:1px solid rgba(236,236,232,.28);color:var(--gold);
   background:rgba(6,6,6,.4);user-select:none;transition:border-color 160ms var(--e-out)}
@@ -1170,8 +1169,7 @@ button:focus-visible,.go:focus-visible{outline:1px solid var(--gold);outline-off
 #pnTx #zjScene3D>canvas,#pnTx #mdScene3D>canvas,#pnTx #modScene3D>canvas{
       filter:saturate(.58) brightness(.94) contrast(1.05) sepia(.16)}
 /* 白昼模式那条整站反色照旧先生效 */
-html.lux #pnTx #zjScene3D>canvas,html.lux #pnTx #mdScene3D>canvas,html.lux #pnTx #modScene3D>canvas{
-      filter:invert(1) hue-rotate(180deg) saturate(.58) contrast(1.05) sepia(.12)}
+
 /* 玻璃罩：把这扇窗自己的底色罩在画面上，再收一圈暗角——
    看着才像「隔着这扇毛玻璃窗往外看」，而不是把一张外来的图钉在框里。
    z-index:3 压在画布之上；引擎那几枚小片也在这层底下，罩子因此给得很淡。 */
@@ -1555,6 +1553,216 @@ html.lux #pnTx #zjScene3D>canvas,html.lux #pnTx #mdScene3D>canvas,html.lux #pnTx
 .gbTrack i,.genBar i{transition:width 260ms var(--e-io)}
 
 #lineTg{display:none!important}
+
+/* ══════════ 奶油主题（☀ 切换）══════════
+   不是反色滤镜：每一族颜色（墨／纸／线／金／警示／蓝）各有调色曲线，
+   按「相对底色的对比度守恒」反解明度——暗色版里 7.3:1 的线，奶油版还是 7.3:1，
+   主次层级逐档对齐；只在顶端（17:1 的白字）压到 12:1，免得纯黑字发硬。
+   金保色相压明度，两级金按原次序压进 3.2–6.6 区间，仍是两档强调色。 */
+html.lux{color-scheme:light}
+html.lux{--ink:#f0e9db;--line:#51493f;--paper:#2d2924;--txt:#342f2a;--mut:#817364;--gold:#7e5a1b;--gold-hi:#6b4c11}
+html.lux *{scrollbar-color:rgba(126,90,27,0.42) transparent}
+html.lux ::-webkit-scrollbar-track{background:rgba(45,41,36,0.043)}
+html.lux ::-webkit-scrollbar-thumb{background:rgba(126,90,27,0.34)}
+html.lux ::-webkit-scrollbar-thumb:hover{background:rgba(107,76,17,0.66)}
+html.lux #vig{background:radial-gradient(ellipse 90% 80% at 50% 42%,transparent 55%,rgba(235,229,217,0.303) 100%)}
+html.lux .tag{color:#ece7db}
+html.lux #edgeL{color:#b8ad9d}
+html.lux #edgeR{color:#b8ad9d}
+html.lux .cframe{border:1px solid rgba(45,41,36,0.43)}
+html.lux #mission .m-tag .tag{color:#ece7db}
+html.lux #mission .num{color:#ece7db}
+html.lux #mission .ttl span{color:#ece7db}
+html.lux .ghost .num{-webkit-text-stroke:1px rgba(45,41,36,0.645)}
+html.lux #foot{border-top:1px solid #daceb6;background:rgba(240,233,219,0.396)}
+html.lux #foot .go{border:1px solid rgba(126,90,27,0.45);background:rgba(126,90,27,0.07)}
+html.lux #menu .mItem{color:#534a40}
+html.lux #lineSel{background:rgba(240,233,219,0.533)}
+html.lux #lsMission .m-tag .tag{color:#ece7db}
+html.lux #lsMission .num{color:#ece7db}
+html.lux #lsMission .ttl span{color:#ece7db}
+html.lux #lsFoot{border-top:1px solid #daceb6;background:rgba(240,233,219,0.396)}
+html.lux #lsFoot .go{border:1px solid rgba(126,90,27,0.45);background:rgba(126,90,27,0.07)}
+html.lux #menu .mItem:hover{border-color:rgba(126,90,27,0.45);text-shadow:0 0 14px rgba(107,76,17,0.5)}
+html.lux #menu .mFoot{color:#a89a86}
+html.lux #intro .iBtn{border:1px solid rgba(45,41,36,0.301)}
+html.lux #flash{background:#2d2924}
+html.lux #link{background:rgba(240,233,219,0.473)}
+html.lux #link .box{border:1px solid rgba(45,41,36,0.344)}
+html.lux #eraBox,html.lux #persona,html.lux #psRes{background:rgba(240,233,219,0.319)}
+html.lux #eraBox .box,html.lux #persona .box,html.lux #psRes .box{border:1px solid rgba(45,41,36,0.344);background:rgba(240,233,219,0.132);box-shadow:0 18px 48px rgba(74,58,36,0.231)}
+html.lux #psRes{background:rgba(240,233,219,0.506)}
+html.lux #psRes textarea{background:rgba(45,41,36,0.026);border:1px solid rgba(45,41,36,0.155)}
+html.lux #eraBox input{border-bottom:1px solid rgba(45,41,36,0.344)}
+html.lux .ebEraBtn{border:1px solid rgba(45,41,36,0.258)}
+html.lux .ebEraBtn.on{color:#ece7db}
+html.lux #eraBox input.bad{border-color:#c7432f;color:#b53d2b}
+html.lux .eBtn{border:1px solid rgba(45,41,36,0.301)}
+html.lux #persona .psBody{scrollbar-color:rgba(126,90,27,0.55) rgba(45,41,36,0.06)}
+html.lux #persona .pField{border-bottom:1px solid rgba(45,41,36,0.12)}
+html.lux #persona .psCard{border:1px solid rgba(126,90,27,0.4)}
+html.lux #persona .psCard:hover{background:rgba(126,90,27,0.08)}
+html.lux #persona .npcCard{border:1px solid rgba(45,41,36,0.138)}
+html.lux .psDoc{border-left:2px solid rgba(126,90,27,0.45)}
+html.lux .psDoc .pdT{color:#38322d}
+html.lux #game{background:rgba(240,233,219,0.143)}
+html.lux #game::before{background:radial-gradient(ellipse 90% 80% at 50% 42%,transparent 55%,rgba(235,229,217,0.303) 100%)}
+html.lux #luxTg{border:1px solid rgba(45,41,36,0.241);background:rgba(240,233,219,0.22)}
+html.lux #game .gt{border:1px solid rgba(45,41,36,0.189)}
+html.lux #game .gNarr{color:#3b352f}
+html.lux #game .gNarr .me{color:#445d7e}
+html.lux #game .gEot{color:#a89a86}
+html.lux #game .gInput{background:linear-gradient(0deg,rgba(240,233,219,0.484) 0%,rgba(240,233,219,0.363) 42%,rgba(240,233,219,0) 76%)}
+html.lux #game .gm{background:rgba(240,233,219,0.33)}
+html.lux #game .gm.on{color:#ece7db}
+html.lux #game .gmBtn{border:1px solid rgba(126,90,27,0.42);background:rgba(240,233,219,0.33)}
+html.lux #game .gmMenu{background:rgba(240,233,219,0.132);border:1px solid rgba(45,41,36,0.344);box-shadow:0 18px 48px rgba(74,58,36,0.231)}
+html.lux #game .gmMenu b{color:#342f2a}
+html.lux #game .gmMenu .gm.on,html.lux #game .gmMenu .gsug.on{background:rgba(126,90,27,0.16)}
+html.lux #game .gmMenu .gm:hover,html.lux #game .gmMenu .gsug:hover{background:rgba(45,41,36,0.052)}
+html.lux #game .gmSep{background:rgba(45,41,36,0.12)}
+html.lux #game .gsug{border:1px solid rgba(126,90,27,0.28);background:rgba(240,233,219,0.33)}
+html.lux #game #dreamIn.on,html.lux #game #dreamOut.on{color:#ece7db}
+html.lux #game .gSugRow .sg{border:1px solid rgba(126,90,27,0.3);background:rgba(240,233,219,0.303)}
+html.lux #game .gSugRow .sg:hover{background:rgba(126,90,27,0.16)}
+html.lux #game .gSugRow .sg.risk{border-color:rgba(195,66,46,0.55)}
+html.lux #game .gSugRow .sg.risk i{color:#c3422e}
+html.lux #game .gLine input{border-bottom:1px solid rgba(45,41,36,0.215)}
+html.lux #game .gAux{border:1px solid rgba(45,41,36,0.172)}
+html.lux #game .gAux.on{color:#ece7db}
+html.lux .cfgTabs{border-bottom:1px solid rgba(45,41,36,0.138)}
+html.lux .cfgTabs span.on{color:#ece7db}
+html.lux .lRow{border-bottom:1px solid rgba(45,41,36,0.086);color:#413b34}
+html.lux .aIn{border-bottom:1px solid rgba(45,41,36,0.258)}
+html.lux .vLine{color:#413b34}
+html.lux .vLine.me{color:#445d7e}
+html.lux #game .gSend:hover{color:#ece7db}
+html.lux #game .gMfd{--mut:#51493f;border-left:1px solid rgba(45,41,36,0.12);background:rgba(240,233,219,0.143)}
+html.lux .mBar{background:rgba(45,41,36,0.086)}
+html.lux .mBar.red i{background:#c7432f}
+html.lux .mStep{border-top:2px solid rgba(45,41,36,0.103)}
+html.lux .mLead{color:#342f2a}
+html.lux .mOp{border:1px solid rgba(45,41,36,0.155)}
+html.lux .gArr .win{background:rgba(240,233,219,0.231);border:1px solid rgba(45,41,36,0.258)}
+html.lux .gArr .ic{background:#ece7db;border:1px solid rgba(45,41,36,0.292)}
+html.lux #game.mapOpen #arrMap .ic,html.lux #game.armOpen #arrArm .ic,html.lux #game.shopOpen #arrShop .ic,html.lux #game.txOpen #arr3d .ic{color:#ece7db}
+html.lux .gPanel{background:rgba(240,233,219,0.187);border:1px solid rgba(45,41,36,0.172);box-shadow:0 14px 34px rgba(74,58,36,0.21)}
+html.lux #pnArm::before{background:linear-gradient(180deg,rgba(240,233,219,0.506) 0%,rgba(240,233,219,0.341) 46%,rgba(240,233,219,0) 100%);-webkit-mask-image:linear-gradient(180deg,#ebe5d9 44%,transparent 100%);mask-image:linear-gradient(180deg,#ebe5d9 44%,transparent 100%)}
+html.lux .shRow{border-bottom:1px solid rgba(45,41,36,0.06)}
+html.lux .shRow:hover{background:rgba(45,41,36,0.039)}
+html.lux .shRow .bu{border:1px solid rgba(45,41,36,0.241)}
+html.lux .shHead{background:rgba(240,233,219,0.506);border-bottom:1px solid rgba(45,41,36,0.12)}
+html.lux .shTabs{background:rgba(240,233,219,0.517);border-bottom:1px solid rgba(45,41,36,0.12)}
+html.lux .shSec{border-bottom:1px solid rgba(45,41,36,0.086)}
+html.lux .aSlot{border:1px solid rgba(45,41,36,0.138)}
+html.lux .aSlot .ic{border:1px solid rgba(123,86,21,0.35)}
+html.lux .aSlot.empty .ic{color:rgba(123,86,21,0.28)}
+html.lux .bCell{border:1px solid rgba(45,41,36,0.155)}
+html.lux .bCell.emptyc{border-color:rgba(45,41,36,0.086)}
+html.lux .armDet{border:1px solid rgba(45,41,36,0.138)}
+html.lux .armDet .ops span{border:1px solid rgba(45,41,36,0.215)}
+html.lux .armDet .ops span.warn{color:#bc3f2c;border-color:rgba(188,63,44,0.55)}
+html.lux .pFade{mask-image:linear-gradient(to bottom,transparent,#ebe5d9 72%);background:linear-gradient(to bottom,rgba(240,233,219,0),rgba(240,233,219,0.495))}
+html.lux .aRow{border-bottom:1px solid rgba(45,41,36,0.103)}
+html.lux .genBar .gbTrack{border:1px solid rgba(45,41,36,0.189);background:rgba(45,41,36,0.026)}
+html.lux .genBar .gbTrack i{background:linear-gradient(90deg,rgba(126,90,27,0.16),rgba(126,90,27,0.34))}
+html.lux .genBar .gbStop{border:1px solid rgba(199,67,47,0.45);color:#c7432f}
+html.lux .genBar .gbStop:hover{border-color:#c7432f;box-shadow:0 0 9px rgba(199,67,47,0.3)}
+html.lux .gDlg{background:rgba(240,233,219,0.319)}
+html.lux .gDlg .box{border:1px solid rgba(45,41,36,0.344);background:rgba(240,233,219,0.132);box-shadow:0 18px 48px rgba(74,58,36,0.231)}
+html.lux #dlgCfg .gt,html.lux #dlgApi .gt{border:1px solid rgba(45,41,36,0.189)}
+html.lux .sRow{border-bottom:1px solid rgba(45,41,36,0.103)}
+html.lux .sRow 
+input[type=range]{background:linear-gradient(90deg,var(--gold) 0 calc(var(--rv,0)*100%),
+                 rgba(45,41,36,0.224) calc(var(--rv,0)*100%) 100%) no-repeat center/100% 1px}
+html.lux input[type=range]::-webkit-slider-thumb{box-shadow:0 0 0 1px rgba(74,58,36,0.357)}
+html.lux input[type=range]::-moz-range-thumb{box-shadow:0 0 0 1px rgba(74,58,36,0.357)}
+html.lux .sSeg span{border:1px solid rgba(45,41,36,0.172)}
+html.lux .sSeg span.on{color:#ece7db}
+html.lux .cxTab{border:1px solid rgba(45,41,36,0.189)}
+html.lux .cxTab.on{color:#ece7db}
+html.lux .cxCats{border-right:1px solid rgba(45,41,36,0.12)}
+html.lux .cxCat.on{color:#ece7db}
+html.lux .cxEnts{border-right:1px solid rgba(45,41,36,0.12)}
+html.lux .cxEnt.on{background:rgba(126,90,27,0.1)}
+html.lux .cxBody p{color:#38322d}
+html.lux .ebTab{border:1px solid rgba(45,41,36,0.189)}
+html.lux .ebTab.on{color:#ece7db}
+html.lux .ebOp{border:1px solid rgba(45,41,36,0.12)}
+html.lux .mNpc{border:1px solid rgba(45,41,36,0.103)}
+html.lux .mNpc .nLine{color:#3a352f}
+html.lux .mMind{border-left:1px solid rgba(126,90,27,0.55)}
+html.lux .mMind.mute{border-left-color:rgba(45,41,36,0.155)}
+html.lux .mNpc .nEye{border-left:2px solid rgba(107,76,17,0.35)}
+html.lux .svSlot{border:1px solid rgba(45,41,36,0.155)}
+html.lux #dlgSave{background:#f0e9db}
+html.lux .svFold{background:rgba(240,233,219,0.132);border:1px solid rgba(45,41,36,0.258)}
+html.lux .svFold .tab{background:rgba(240,233,219,0.132);border:1px solid rgba(45,41,36,0.258)}
+html.lux .svFold .num{color:rgba(51,46,41,0.473);border:1px solid rgba(45,41,36,0.189)}
+html.lux .svFold .lb{color:rgba(59,53,47,0.473)}
+html.lux .svFold.on{border-color:rgba(45,41,36,0.602)}
+html.lux .svFold.on .tab{border-color:rgba(45,41,36,0.602)}
+html.lux .svFold.on .num{color:#2d2924;border-color:rgba(45,41,36,0.43)}
+html.lux .svFold.on .lb{color:rgba(48,43,39,0.774)}
+html.lux .svFold.sel{border-color:#2d2924;background:rgba(230,223,207,0.506);box-shadow:0 0 14px rgba(45,41,36,0.241)}
+html.lux .svFold.sel .tab{border-color:#2d2924;background:rgba(230,223,207,0.506)}
+html.lux #svCoreT{color:#2d2924}
+html.lux #svCoreSub{color:rgba(48,43,39,0.731);border:1px solid rgba(45,41,36,0.241);background:rgba(234,228,214,0.468)}
+html.lux .svAct{border:1px solid rgba(45,41,36,0.301);background:rgba(240,233,219,0.44)}
+html.lux .svAct.warn{border-color:rgba(199,67,47,0.5);color:#c7432f}
+html.lux #svClock{color:#2d2924}
+html.lux #svRedX{border:1px solid rgba(199,67,47,0.7);color:#c7432f;background:rgba(240,233,219,0.275)}
+html.lux #svRedX:hover{border-color:#c7432f;box-shadow:0 0 10px rgba(199,67,47,0.35)}
+html.lux .zjP,html.lux .fd-ov{--t-bg0:#f0e9db;--t-bg1:#ebe5d8;--t-bg2:#e8e2d3;--t-grid:#d3c5a9;--t-g0:#2d2924;--t-g1:#6b4c11;--t-g1b:#342f2a;--t-g2:#7e5a1b;--t-g3:#817364;--t-g4:#a89a86;--t-paper:#2d2924;--t-a1:#6b4c11;--t-a2:#7e5a1b;--t-a3:#8e6a27;--t-r1:#c7432f;--t-ink:#ece7db;--fg-data:#2d2924;--fg-label:#5d5347;--fg-dim:#817364;--br:rgba(45,41,36,0.155);--br-hi:#7e5a1b;--br-corner:#51493f;--inv-bg:#7e5a1b;--ink:#2d2924;--ink2:#342f2a;--gold:#7e5a1b;--gold2:#6b4c11;--gold3:#2d2924;--mut:#51493f;--grn2:#7e5a1b;--red:#c7432f;--red2:#6b4c11}
+html.lux .zjP .gbtn{color:#ece7db}
+html.lux .zjP .obtn{border:1px solid rgba(45,41,36,0.189)}
+html.lux .zjP .obtn:hover{color:#342f2a;background:rgba(45,41,36,0.034)}
+html.lux .zjP input::placeholder,html.lux .zjP textarea::placeholder{color:#817364}
+html.lux #zjGraphSvg .gph-nm{fill:#342f2a}
+html.lux #zjGraphSvg g[data-npc]:hover .fd-fold>rect:first-child{stroke:#6b4c11}
+html.lux #zjGraphSvg g[data-npc]:hover .gph-nm{fill:#6b4c11}
+html.lux #zjGraphSvg g.gph-sel .fd-fold>rect:first-child{stroke:#6b4c11}
+html.lux #zjGraphSvg g.gph-sel .gph-nm{fill:#6b4c11}
+html.lux .fd-ov{background:rgba(240,233,219,0.165)}
+html.lux .fd-win{border:1px solid rgba(45,41,36,0.344);background:rgba(240,233,219,0.132);box-shadow:0 18px 48px rgba(74,58,36,0.231);color:#342f2a}
+html.lux .fd-win h2{color:#2d2924}
+html.lux .fd-row{border-bottom:1px solid rgba(45,41,36,0.103)}
+html.lux .fd-k{color:#51493f}
+html.lux .fd-v{color:#2d2924}
+html.lux .fd-nd{color:#5d5347}
+html.lux .fd-bar{background:rgba(45,41,36,0.086)}
+html.lux .fd-quote{color:#6b4c11}
+html.lux .fd-last{color:#51493f}
+html.lux .fd-btn{border:1px solid rgba(45,41,36,0.301);color:#342f2a}
+html.lux .fd-btn.fd-warn{color:#c7432f;border-color:rgba(199,67,47,0.5)}
+html.lux .fd-nav{border:1px solid rgba(45,41,36,0.301);color:#342f2a}
+html.lux #pnTx{background:rgba(240,233,219,0.187);border:1px solid rgba(45,41,36,0.172);box-shadow:0 14px 34px rgba(74,58,36,0.21)}
+html.lux #pnTx #modScene3D{background:rgba(240,233,219,0.396) !important}
+html.lux #vnIsle{background:#f0e9db}
+html.lux #vnWash{background:linear-gradient(180deg,rgba(235,229,217,0.187),rgba(235,229,217,0.033) 26%,rgba(235,229,217,0.044) 62%,rgba(235,229,217,0.253));box-shadow:inset 0 0 90px rgba(74,58,36,0.231)}
+html.lux #vnIsle.wNight #vnWash{background:linear-gradient(180deg,rgba(101,132,172,0.5),rgba(101,132,172,0.14) 30%,rgba(101,132,172,0.2) 64%,rgba(101,132,172,0.56))}
+html.lux #vnIsle.wRed #vnWash{background:linear-gradient(180deg,rgba(212,91,72,0.44),rgba(212,91,72,0.1) 28%,rgba(212,92,73,0.16) 64%,rgba(212,92,73,0.5))}
+html.lux #vnCast canvas{filter:drop-shadow(0 6px 18px rgba(74,58,36,0.273))}
+html.lux #vnLoc{color:rgba(126,90,27,0.78);text-shadow:0 1px 6px rgba(74,58,36,0.336)}
+html.lux #pnTx::after{background:linear-gradient(180deg,rgba(240,233,219,0.11) 0%,rgba(240,233,219,0) 40%,rgba(169,120,56,0.22) 100%);box-shadow:inset 0 0 48px rgba(74,58,36,0.126)}
+html.lux #game.txBig #pnTx{background:rgba(240,233,219,0.248)}
+html.lux #txHint{color:#8c4e1a;text-shadow:0 1px 3px rgba(74,58,36,0.42)}
+html.lux .mvVig{background:radial-gradient(ellipse 92% 76% at 50% 46%,transparent 48%,rgba(235,229,217,0.363) 100%)}
+html.lux .mvCard .cfr{background:rgba(240,233,219,0.33)}
+html.lux .mvCard.on .cfr{background:rgba(240,233,219,0.363)}
+html.lux .gMfd.mvDeck .mvFoot{border-left:1px solid #daceb6}
+html.lux .gMfd.mvDeck .mvCard .cfr{background:rgba(240,233,219,0.429);border:1px solid rgba(45,41,36,0.172);box-shadow:0 14px 34px rgba(74,58,36,0.21)}
+html.lux .gMfd.mvDeck .mvCard.thumb .cfr{background:rgba(240,233,219,0.231) !important;border-color:rgba(45,41,36,0.258)}
+html.lux .mvCard .ic{background:#ece7db;border:1px solid rgba(45,41,36,0.292)}
+html.lux .gMfd.mvDeck .mvWin{background:rgba(240,233,219,0.055);border:1px solid rgba(45,41,36,0.172);box-shadow:0 14px 34px rgba(74,58,36,0.21)}
+html.lux .gMfd.mvDeck .mvCard.on .cfr{border-color:rgba(126,90,27,0.72) !important}
+html.lux .gMfd.mvDeck .mvCard.on .ic{border-color:rgba(126,90,27,0.8);background:rgba(126,90,27,0.16)}
+html.lux .mvGhost .g2{-webkit-text-stroke:1px rgba(45,41,36,0.533)}
+html.lux .mvFoot{border-top:1px solid #daceb6;background:rgba(240,233,219,0.396)}
+html.lux .mvFoot .go{border:1px solid rgba(45,41,36,0.224)}
+html.lux .svFold:hover{border-color:rgba(126,90,27,0.75);box-shadow:0 0 0 1px rgba(126,90,27,0.25),0 4px 14px rgba(74,58,36,0.21)}
+html.lux .svFold:active{background:rgba(126,90,27,0.16)}
+@media (max-width:760px){html.lux .gArr .win{background:rgba(240,233,219,0.11)}html.lux .gArr .t{color:#3b352f}html.lux .gMfd.mvDeck .mvCard.thumb .cfr{background:rgba(240,233,219,0.11) !important}html.lux #game .gPanel{border:1px solid rgba(45,41,36,0.172) !important;box-shadow:0 14px 34px rgba(74,58,36,0.21) !important}html.lux #game:not(.mvOpen) .gMfd.mvDeck .mvCard.on .cfr{border-color:rgba(45,41,36,0.258) !important}html.lux #game:not(.mvOpen) .gMfd.mvDeck .mvCard.on .ic{border-color:rgba(45,41,36,0.292) !important;background:#ece7db !important}html.lux #game .gMfd.mvDeck .mvWin{background:rgba(240,233,219,0.341) !important}html.lux #game .gPanel{background:rgba(240,233,219,0.341) !important}html.lux #game .gMfd.mvDeck .mvCard.thumb .mvGhost .g3{color:#3b352f}html.lux #game[data-pg=map] #pnArm{border-top:1px solid rgba(45,41,36,0.138)}html.lux .gNav{border:1px solid rgba(45,41,36,0.189);background:rgba(240,233,219,0.396)}html.lux .gNav span.on{color:#ece7db}html.lux #dlgBook .cxCats,html.lux #dlgBook .cxEnts{border-bottom:1px solid rgba(45,41,36,0.12)}html.lux #dlgBook .cxCat,html.lux #dlgBook .cxEnt{border:1px solid rgba(45,41,36,0.138)}}
 </style>
 
 <canvas id="terrain"></canvas>
@@ -2286,11 +2494,11 @@ function terrainPaint(g,W,H,t,travel,par,q){
         g.fillRect(sx,sy-1.2,1.6,1.6);g.restore();
       }
     }
-    g.strokeStyle='rgba(156,156,152,'+alpha.toFixed(3)+')';
+    g.strokeStyle=CO('rgba(156,156,152,')+alpha.toFixed(3)+')';
     g.lineWidth=1;
     g.stroke();
   }
-  g.strokeStyle='rgba(156,156,152,.07)';
+  g.strokeStyle=CO('rgba(156,156,152,.07)');
   for(var c2=0;c2<=cols;c2+=6){
     g.beginPath();
     for(var r2=0;r2<rows;r2++){
@@ -2502,13 +2710,13 @@ function columnDraw(C,d){
   g.clearRect(0,0,W,H);
   /* ground: dashed survey ellipse + centre tick */
   var gy=cy+S*.52;
-  g.strokeStyle='rgba(217,217,212,.22)';g.lineWidth=1;
+  g.strokeStyle=CO('rgba(217,217,212,.22)');g.lineWidth=1;
   g.setLineDash([3*DPR,5*DPR]);
   g.beginPath();g.ellipse(cx,gy,S*.19,S*.055,0,0,Math.PI*2);g.stroke();
   g.setLineDash([]);
   g.beginPath();g.moveTo(cx-4*DPR,gy);g.lineTo(cx+4*DPR,gy);g.stroke();
   /* particles: seek targets (assembly), then hover */
-  g.globalCompositeOperation='lighter';
+  g.globalCompositeOperation=CMP();
   var pts=C.pts,cur=C.cur,n=pts.length;
   var asm=now-C.t0;
   var settled=asm>2600;
@@ -2543,7 +2751,7 @@ function railDraw(){
   var W=rc.width,H=rc.height;
   rg.clearRect(0,0,W,H);
   var m=W*.09,span=W-2*m,y=H*.52;
-  rg.strokeStyle='rgba(217,217,212,.4)';rg.lineWidth=1;
+  rg.strokeStyle=CO('rgba(217,217,212,.4)');rg.lineWidth=1;
   rg.beginPath();rg.moveTo(m,y);rg.lineTo(W-m,y);rg.stroke();
   var fine=N*6;
   for(var q=0;q<=fine;q++){
@@ -2561,11 +2769,11 @@ function railDraw(){
   }
   var fp=mod(pos,N);var nx=m+span*Math.min(fp/(N-1),1);
   rg.beginPath();rg.arc(nx,y,11*DPR,0,Math.PI*2);
-  rg.fillStyle='rgba(6,6,6,.9)';rg.fill();
-  rg.strokeStyle='rgba(236,236,232,.9)';rg.stroke();
+  rg.fillStyle=CO('rgba(6,6,6,.9)');rg.fill();
+  rg.strokeStyle=CO('rgba(236,236,232,.9)');rg.stroke();
   rg.beginPath();rg.arc(nx,y,14.5*DPR,0,Math.PI*2);
-  rg.strokeStyle='rgba(201,155,63,.55)';rg.stroke();
-  rg.fillStyle='#ecece8';
+  rg.strokeStyle=CO('rgba(201,155,63,.55)');rg.stroke();
+  rg.fillStyle=CO('#ecece8');
   var selR=mod(Math.round(pos),N);
   rg.fillText(selR===0?'✦':pad(selR-1),nx,y+3.5*DPR);
 }
@@ -2927,12 +3135,12 @@ function introDraw(){
     var nearFade=clamp01((zrel-.3)/1.1);       /* soften rings sweeping past the camera */
     var A=(.03+.34*t*t)*nearFade;
     var vs=ringVs(k);
-    ig.strokeStyle='rgba(201,155,63,'+A.toFixed(3)+')';
+    ig.strokeStyle=CO('rgba(201,155,63,')+A.toFixed(3)+')';
     ig.beginPath();
     for(var s2=0;s2<=TSEG;s2++){var v=vs[s2%TSEG];if(s2===0)ig.moveTo(v[0],v[1]);else ig.lineTo(v[0],v[1]);}
     ig.stroke();
     if(prevVs){                                /* triangulate tunnel wall to the ring behind */
-      ig.strokeStyle='rgba(201,155,63,'+(A*.6).toFixed(3)+')';
+      ig.strokeStyle=CO('rgba(201,155,63,')+(A*.6).toFixed(3)+')';
       ig.beginPath();
       for(var s3=0;s3<TSEG;s3++){
         ig.moveTo(vs[s3][0],vs[s3][1]);ig.lineTo(prevVs[s3][0],prevVs[s3][1]);
@@ -2942,14 +3150,14 @@ function introDraw(){
     }
     for(var s4=0;s4<TSEG;s4++){
       if(hash(k,s4)>.80){
-        ig.fillStyle=(hash(k,s4)>.95)?'rgba(240,208,132,'+(A*1.6).toFixed(2)+')'
-                                     :'rgba(212,166,72,'+A.toFixed(2)+')';
+        ig.fillStyle=(hash(k,s4)>.95)?CD('240,208,132',(A*1.6).toFixed(2))
+                                     :CD('212,166,72',A.toFixed(2));
         ig.fillRect(vs[s4][0],vs[s4][1],1.6*DPR,1.6*DPR);
       }
     }
     prevVs=vs;
   }
-  ig.globalCompositeOperation='lighter';
+  ig.globalCompositeOperation=CMP();
   /* hero layer: SPQR assembling from the storm */
   for(var i3=0;i3<tp.length;i3++){
     var p=tp[i3],c=tcur[i3];
@@ -3116,13 +3324,13 @@ function eraDraw(){
   var zs=Math.sqrt(ERA.zoom||1);                /* dots swell gently as you zoom in */
   mg.clearRect(0,0,mW,mH);
   var hg=mg.createRadialGradient(cx,cy,0,cx,cy,R*1.12);
-  hg.addColorStop(0,'rgba(255,148,38,0)');
-  hg.addColorStop(.86,'rgba(255,148,38,0)');
-  hg.addColorStop(.905,'rgba(255,148,38,.20)');
-  hg.addColorStop(1,'rgba(255,148,38,0)');
+  hg.addColorStop(0,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.86,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.905,CO('rgba(255,148,38,.20)'));
+  hg.addColorStop(1,CO('rgba(255,148,38,0)'));
   mg.fillStyle=hg;mg.beginPath();mg.arc(cx,cy,R*1.12,0,Math.PI*2);mg.fill();
   var RG=R*1.22;
-  mg.strokeStyle='rgba(201,155,63,.09)';mg.lineWidth=1;
+  mg.strokeStyle=CO('rgba(201,155,63,.09)');mg.lineWidth=1;
   mg.beginPath();
   for(var ge=0;ge<GEO.length;ge++){
     var E=GEO[ge],q=[null,null],vis=true;
@@ -3237,7 +3445,7 @@ function gbgDraw(){
   var now=performance.now(),el=now-GBG.t0;
   var S=mH*.80,cx=mW*.40,cy=mH*.47,i,p;
   var gl=mg.createRadialGradient(cx,cy,0,cx,cy,S*.60);
-  gl.addColorStop(0,'rgba(212,166,72,.09)');gl.addColorStop(1,'rgba(212,166,72,0)');
+  gl.addColorStop(0,CO('rgba(212,166,72,.09)'));gl.addColorStop(1,CO('rgba(212,166,72,0)'));
   mg.fillStyle=gl;mg.fillRect(cx-S*.65,cy-S*.62,S*1.3,S*1.24);
   /* no shatter: order swap is a GRAVITY re-forming — each particle is pulled
      along a curled free-fall path straight into its slot in the next order */
@@ -3248,7 +3456,7 @@ function gbgDraw(){
   }
   /* same spin rate + perspective as the ring cards (columnDraw) */
   var rot=REDUCED?0:now*.00028,ca=Math.cos(rot),sa=Math.sin(rot),F=2.6;
-  mg.globalCompositeOperation='lighter';
+  mg.globalCompositeOperation=CMP();
   for(i=0;i<COL_N;i++){
     p=GBG.p[i];
     if(REDUCED){p.x=p.tx;p.y=p.ty;p.z=p.tz;}
@@ -3269,15 +3477,15 @@ function gbgDraw(){
     var X=cx+px*S*per,Y=cy+(.52-y)*S*per;
     if(X<-30||X>mW+30||Y<-30||Y>mH+30)continue;
     var al=Math.min(.98,Math.max(.16,.24+(per-.93)*8)*1.4);
-    if(p.hi){mg.fillStyle='rgba(240,208,132,'+al.toFixed(2)+')';
+    if(p.hi){mg.fillStyle=CO('rgba(240,208,132,')+al.toFixed(2)+')';
       var s1=4.2*per*DPR;mg.fillRect(X,Y,s1,s1);}
-    else{mg.fillStyle='rgba(212,166,72,'+(al*.85).toFixed(2)+')';
+    else{mg.fillStyle=CO('rgba(212,166,72,')+(al*.85).toFixed(2)+')';
       var s2=3.2*per*DPR;mg.fillRect(X,Y,s2,s2);}
   }
   mg.globalCompositeOperation='source-over';
   var ca2=REDUCED?1:(GBG.phase===0?Math.min(1,el/900):1);
   if(ca2>0){
-    mg.fillStyle='rgba(212,166,72,'+(.55*ca2).toFixed(2)+')';
+    mg.fillStyle=CO('rgba(212,166,72,')+(.55*ca2).toFixed(2)+')';
     mg.font=(9.5*DPR)+'px ui-monospace,Menlo,monospace';
     mg.textAlign='center';mg.textBaseline='alphabetic';
     mg.fillText('◆  '+COL_CYC[GBG.ord][1].split('').join(' ')+'  ◆',cx,cy+S*.575);
@@ -3289,18 +3497,33 @@ function gbgDraw(){
    这里把颜色×透明度预生成成 4×16 张固定色表，绘制时只往对应桶里塞矩形，
    最后每桶设一次 fillStyle、走一条 path 一次 fill。
    调用量从 O(点数) 降到 O(64)，画面差别只是透明度被量化成十六档（看不出来）。 */
+/* ══ 画布调色台 ══
+   界面 DOM 那半边由 html.lux 的覆盖规则换色；画布这半边 CSS 管不着，
+   同一套映射在这里再走一遍：CO() 换静态色，CD() 换动态拼接的色，
+   CMP() 换叠加模式——深底上用 lighter 加亮，浅底上必须回常规合成，
+   否则粒子越叠越白，奶油底上等于什么都没画。 */
+var LUXON=0;
+var CMAP={'#c99b3f':'#7e5a1b','#d9d9d4':'#342f2a','#ecece8':'#2d2924','rgba(0,0,0,.5)':'rgba(235,229,217,0.275)','rgba(0,0,0,.55)':'rgba(235,229,217,0.303)','rgba(107,107,102,.9)':'rgba(129,115,100,0.774)','rgba(154,154,148,.75)':'rgba(83,74,64,0.645)','rgba(154,154,148,.8)':'rgba(83,74,64,0.688)','rgba(156,156,152,.07)':'rgba(81,73,63,0.06)','rgba(156,156,152,.34)':'rgba(81,73,63,0.292)','rgba(201,155,63,.09)':'rgba(126,90,27,0.09)','rgba(201,155,63,.35)':'rgba(126,90,27,0.35)','rgba(201,155,63,.4)':'rgba(126,90,27,0.4)','rgba(201,155,63,.55)':'rgba(126,90,27,0.55)','rgba(212,166,72,.09)':'rgba(123,86,21,0.09)','rgba(212,166,72,.5)':'rgba(123,86,21,0.5)','rgba(212,166,72,.55)':'rgba(123,86,21,0.55)','rgba(212,166,72,0)':'rgba(123,86,21,0)','rgba(217,217,212,.16)':'rgba(52,47,42,0.138)','rgba(217,217,212,.20)':'rgba(52,47,42,0.172)','rgba(217,217,212,.22)':'rgba(52,47,42,0.189)','rgba(217,217,212,.4)':'rgba(52,47,42,0.344)','rgba(217,217,212,.42)':'rgba(52,47,42,0.361)','rgba(217,217,212,.55)':'rgba(52,47,42,0.473)','rgba(236,200,120,.95)':'rgba(107,76,17,0.95)','rgba(236,236,232,.04)':'rgba(45,41,36,0.034)','rgba(236,236,232,.12)':'rgba(45,41,36,0.103)','rgba(236,236,232,.14)':'rgba(45,41,36,0.12)','rgba(236,236,232,.16)':'rgba(45,41,36,0.138)','rgba(236,236,232,.2)':'rgba(45,41,36,0.172)','rgba(236,236,232,.25)':'rgba(45,41,36,0.215)','rgba(236,236,232,.85)':'rgba(45,41,36,0.731)','rgba(236,236,232,.88)':'rgba(45,41,36,0.757)','rgba(236,236,232,.9)':'rgba(45,41,36,0.774)','rgba(240,208,132,.95)':'rgba(105,76,17,0.95)','rgba(255,148,38,.18)':'rgba(138,77,22,0.18)','rgba(255,148,38,.20)':'rgba(138,77,22,0.2)','rgba(255,148,38,.28)':'rgba(138,77,22,0.28)','rgba(255,148,38,0)':'rgba(138,77,22,0)','rgba(255,208,104,.9)':'rgba(106,75,17,0.9)','rgba(255,208,104,.95)':'rgba(106,75,17,0.95)','rgba(255,222,150,1)':'rgba(106,75,17,1)','rgba(255,236,190,1)':'rgba(104,76,17,1)','rgba(6,6,6,.24)':'rgba(240,233,219,0.132)','rgba(6,6,6,.45)':'rgba(240,233,219,0.248)','rgba(6,6,6,.78)':'rgba(240,233,219,0.429)','rgba(6,6,6,.9)':'rgba(240,233,219,0.495)','rgba(6,6,6,0)':'rgba(240,233,219,0)'};
+var DMAP={'0,0,0':'235,229,217','107,107,102':'129,115,100','156,156,152':'81,73,63','201,155,63':'126,90,27','212,166,72':'123,86,21','216,216,212':'52,47,42','217,217,212':'52,47,42','236,236,232':'45,41,36','240,208,132':'105,76,17','244,244,240':'45,41,36','255,148,38':'138,77,22'};
+function CO(c){return LUXON?(CMAP[c]||c):c;}
+function CD(t,a){return 'rgba('+(LUXON?(DMAP[t]||t):t)+','+a+')';}
+function CMP(){return LUXON?'source-over':'lighter';}
+var GB_COLS_D=['255,64,50','240,208,132','255,184,72','212,166,72'];
+var GB_COLS_L=['185,62,43','105,76,17','117,75,19','123,86,21'];
 var GB_COLS=['255,64,50','240,208,132','255,184,72','212,166,72'];
 var GB_N=32;                       /* 档数：32 档，取桶中值，肉眼与连续值无从分辨 */
 var GB_STYLE=[],GB_BOX=[];
-(function(){
+function GB_BUILD(){
+  var COLS=LUXON?GB_COLS_L:GB_COLS_D;
   for(var c=0;c<4;c++){
     GB_STYLE[c]=[];GB_BOX[c]=[];
     for(var a=0;a<GB_N;a++){
-      GB_STYLE[c][a]='rgba('+GB_COLS[c]+','+((a+.5)/GB_N).toFixed(4)+')';
+      GB_STYLE[c][a]='rgba('+COLS[c]+','+((a+.5)/GB_N).toFixed(4)+')';
       GB_BOX[c][a]=[];
     }
   }
-})();
+}
+GB_BUILD();
 function GB_push(c,a,x,y,w,h){
   if(a<0)a=0;else if(a>GB_N-1)a=GB_N-1;
   var b=GB_BOX[c][a];b.push(x,y,w,h);
@@ -3335,8 +3558,8 @@ function menuDraw(){
   /* light bloom behind the title (GIF-1 style volumetric glow) */
   var gy=mH*.36-PY*mH*.008,gx=mW/2-PX*mW*.008;          /* bloom stays with the title, not the globe */
   var grd=mg.createRadialGradient(gx,gy,0,gx,gy,mH*.42);
-  grd.addColorStop(0,'rgba(212,166,72,'+(.10+.03*Math.sin(mt*.0011)).toFixed(3)+')');
-  grd.addColorStop(1,'rgba(212,166,72,0)');
+  grd.addColorStop(0,CD('212,166,72',(.10+.03*Math.sin(mt*.0011)).toFixed(3)));
+  grd.addColorStop(1,CO('rgba(212,166,72,0)'));
   mg.fillStyle=grd;mg.fillRect(0,0,mW,mH);
   /* particle Earth — orthographic, opens parked on Europe then slow spin */
   var spin=REDUCED?0:Math.max(0,mt-1600)*.000042;
@@ -3347,15 +3570,15 @@ function menuDraw(){
   /* amber-orange rim glow only — no drawn limb circle; the crescent is carried
      purely by the glow and the rim-lit dots */
   var hg=mg.createRadialGradient(cx,cy,0,cx,cy,R*1.12);
-  hg.addColorStop(0,'rgba(255,148,38,0)');
-  hg.addColorStop(.86,'rgba(255,148,38,0)');
-  hg.addColorStop(.905,'rgba(255,148,38,.20)');
-  hg.addColorStop(1,'rgba(255,148,38,0)');
+  hg.addColorStop(0,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.86,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.905,CO('rgba(255,148,38,.20)'));
+  hg.addColorStop(1,CO('rgba(255,148,38,0)'));
   mg.fillStyle=hg;mg.beginPath();mg.arc(cx,cy,R*1.12,0,Math.PI*2);mg.fill();
   /* geodesic shell: DETACHED from the dot sphere — larger radius, so the mesh
      floats past the limb and fills the dark sky upper-right (STEM look) */
   var RG=R*1.32;
-  mg.strokeStyle='rgba(201,155,63,.09)';
+  mg.strokeStyle=CO('rgba(201,155,63,.09)');
   mg.beginPath();
   for(var ge=0;ge<GEO.length;ge++){
     var E=GEO[ge],q=[null,null],vis=true;
@@ -3404,19 +3627,19 @@ function menuDraw(){
   /* dark backing plate lifts the lettering off the map */
   var bx=mW/2+pox,by=mH*.36+poy;
   var bg2=mg.createRadialGradient(bx,by,0,bx,by,mH*.30);
-  bg2.addColorStop(0,'rgba(6,6,6,.78)');
-  bg2.addColorStop(.7,'rgba(6,6,6,.45)');
-  bg2.addColorStop(1,'rgba(6,6,6,0)');
+  bg2.addColorStop(0,CO('rgba(6,6,6,.78)'));
+  bg2.addColorStop(.7,CO('rgba(6,6,6,.45)'));
+  bg2.addColorStop(1,CO('rgba(6,6,6,0)'));
   mg.fillStyle=bg2;mg.fillRect(bx-mH*.5,by-mH*.30,mH,mH*.6);
-  mg.globalCompositeOperation='lighter';
+  mg.globalCompositeOperation=CMP();
   var settled2=mt>2000;
   for(var ti=0;ti<MTP.length;ti++){
     var tpp=MTP[ti],tcc=MTC[ti];
     if(settled2||REDUCED){tcc.x=tpp.x;tcc.y=tpp.y;}
     else if(mt>tcc.delay){tcc.x+=(tpp.x-tcc.x)*.13;tcc.y+=(tpp.y-tcc.y)*.13;}
     var tw3=REDUCED?1:(.82+.18*Math.sin(now*.002+ti*1.3));
-    mg.fillStyle=tpp.hi?'rgba(240,208,132,'+(.95*tw3).toFixed(2)+')'
-                       :'rgba(212,166,72,'+(.68*tw3).toFixed(2)+')';
+    mg.fillStyle=tpp.hi?CD('240,208,132',(.95*tw3).toFixed(2))
+                       :CD('212,166,72',(.68*tw3).toFixed(2));
     var ts=(tpp.hi?.78:.55)*MSTEP;
     mg.fillRect(tcc.x+pox,tcc.y+poy,ts,ts);
   }
@@ -4265,11 +4488,11 @@ function lsTick(){
     var ca=Math.cos(rot),sa=Math.sin(rot);
     g.clearRect(0,0,W,H);
     var gy=cy+S*.50;
-    g.strokeStyle='rgba(217,217,212,.20)';g.lineWidth=1;
+    g.strokeStyle=CO('rgba(217,217,212,.20)');g.lineWidth=1;
     g.setLineDash([3*dpr,5*dpr]);
     g.beginPath();g.ellipse(cx,gy,S*.50,S*.115,0,0,Math.PI*2);g.stroke();
     g.setLineDash([]);
-    g.globalCompositeOperation='lighter';
+    g.globalCompositeOperation=CMP();
     var asm=asm0,settled=done0;
     for(var k=0;k<c.pts.length;k++){
       var p=c.pts[k],q=c.cur[k];
@@ -4576,10 +4799,10 @@ function gmapDraw(){
   var eraRed=ERA.year>=-27&&ERA.year<=395;
   gmc.clearRect(0,0,gmW,gmH);
   var hg=gmc.createRadialGradient(cx,cy,0,cx,cy,R*1.12);
-  hg.addColorStop(0,'rgba(255,148,38,0)');
-  hg.addColorStop(.86,'rgba(255,148,38,0)');
-  hg.addColorStop(.905,'rgba(255,148,38,.18)');
-  hg.addColorStop(1,'rgba(255,148,38,0)');
+  hg.addColorStop(0,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.86,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.905,CO('rgba(255,148,38,.18)'));
+  hg.addColorStop(1,CO('rgba(255,148,38,0)'));
   gmc.fillStyle=hg;gmc.beginPath();gmc.arc(cx,cy,R*1.12,0,Math.PI*2);gmc.fill();
   for(var i=0;i<LANDPTS.length;i++){
     var p=LANDPTS[i],lam=p.lo-lonC;
@@ -4630,9 +4853,9 @@ function gmapDraw(){
     var isDest=GAME.dest===st2.n;
     if(isDest){
       var pu=1+.18*Math.sin(performance.now()*.004);
-      gmc.strokeStyle='rgba(255,208,104,.95)';gmc.lineWidth=1.6*DPR;
+      gmc.strokeStyle=CO('rgba(255,208,104,.95)');gmc.lineWidth=1.6*DPR;
       gmc.beginPath();gmc.arc(mx2,my2,12*DPR*pu,0,Math.PI*2);gmc.stroke();
-      gmc.strokeStyle='rgba(212,166,72,.5)';gmc.lineWidth=1;
+      gmc.strokeStyle=CO('rgba(212,166,72,.5)');gmc.lineWidth=1;
       gmc.beginPath();gmc.arc(mx2,my2,17*DPR*pu,0,Math.PI*2);gmc.stroke();
     }else{
       gmc.strokeStyle=hov?'rgba(255,208,104,.9)':'rgba(212,166,72,.5)';gmc.lineWidth=1;
@@ -5529,7 +5752,14 @@ function uiScaleApply(q){
 var LUX=0;   /* 白昼是会话级可选项：不落盘，每次打开一律黑夜起步 */
 function luxApply(on){
   LUX=on?1:0;
+  LUXON=LUX;                       /* 画布那半边据此换色 */
+  try{GB_BUILD();}catch(_){}       /* 粒子色表重建：加亮色 ↔ 墨色 */
   document.documentElement.classList.toggle('lux',!!on);
+  /* 一次性画的那几张（缩略窗、地图、导轨）不在动画循环里，得手动补一帧 */
+  try{applyGlass();}catch(_){}    /* 玻璃底色那张注入表按主题重写 */
+  try{railDraw();}catch(_){}
+  try{if(typeof gmapDraw==='function')gmapDraw();}catch(_){}
+  try{if(window.__arrPaint)window.__arrPaint();}catch(_){}
   var cb=$('#cfgLux');if(cb)cb.checked=!!on;
   var tg=$('#luxTg');if(tg)tg.textContent=on?'☾':'☀';
 }
@@ -7376,23 +7606,21 @@ function setStore(){lsSet('rome_set',JSON.stringify(SET))}
 var glassCss=document.createElement('style');document.head.appendChild(glassCss);
 function applyGlass(){
   var a=SET.glass/100;
-  /* 这一层跟着 CSS 里那条改成暗角：平铺的黑会把山脉盖成灰纸。
-     拉杆只调四角收多深，中间那 55% 一律不压。 */
+  /* 玻璃底色跟着主题走：黑夜是黑玻璃，奶油是白瓷釉——都靠 alpha 浮在地色上。
+     暗角在浅底上不能用纯黑，改暖褐并把浓度收到四成，否则四角发脏像脏纸。 */
+  var G=LUXON?'252,247,236':'6,6,6';      /* 面板玻璃 */
+  var M=LUXON?'250,244,231':'8,8,8';      /* 情报台条 */
+  var I=LUXON?'240,233,219':'6,6,6';      /* 输入区渐隐到地色 */
+  var V=LUXON?'120,96,60':'0,0,0';        /* 四角暗角 */
+  var vk=LUXON?0.42:1;
   glassCss.textContent='#game::before{background:radial-gradient(ellipse 90% 80% at 50% 42%,'
-    +'transparent 55%,rgba(0,0,0,'+(.20+.42*a).toFixed(2)+') 100%) !important}'
-    +'#game .gMfd{background:rgba(8,8,8,'+(.06+.25*a).toFixed(2)+') !important}'
-    +'#game .gInput{background:linear-gradient(0deg,rgba(6,6,6,'+(.55+.4*a).toFixed(2)+') 0%,rgba(6,6,6,'+(.35+.35*a).toFixed(2)+') 42%,rgba(6,6,6,0) 76%) !important}'
-    /* 情报台那几扇窗跟着同一根「面板透明度」拉杆走——它们就是同一种窗，
-       底色不该有两套。 */
-    +'.gPanel,#pnTx{background:rgba(6,6,6,'+(.04+.16*a).toFixed(2)+') !important}'
-    /* 情报台那六扇单独一档更透的：它们背后只有一层细线框，底色跟左边三扇一样厚的话
-       线全被压掉，看着就是六块不透的黑板。同一根拉杆，系数减半。 */
-    +'.gMfd.mvDeck .mvWin{background:rgba(6,6,6,'+(.02+.08*a).toFixed(2)+') !important}'
-    /* 全屏档背后被自己盖满，透太多只会把正文透出来糊成一片，单给一档更实的 */
-    +'#game.txBig #pnTx{background:rgba(6,6,6,'+(.28+.18*a).toFixed(2)+') !important}'
-    /* 弹窗类：身后隔着一层遮罩，比贴着画面的那几扇给厚一档 */
+    +'transparent 55%,rgba('+V+','+((.20+.42*a)*vk).toFixed(2)+') 100%) !important}'
+    +'#game .gMfd{background:rgba('+M+','+(.06+.25*a).toFixed(2)+') !important}'
+    +'#game .gInput{background:linear-gradient(0deg,rgba('+I+','+(.55+.4*a).toFixed(2)+') 0%,rgba('+I+','+(.35+.35*a).toFixed(2)+') 42%,rgba('+I+',0) 76%) !important}'
+    +'.gPanel,#pnTx{background:rgba('+G+','+(.04+.16*a).toFixed(2)+') !important}'
+    +'.gMfd.mvDeck .mvWin{background:rgba('+G+','+(.02+.08*a).toFixed(2)+') !important}'
     +'.gDlg .box,#eraBox .box,#persona .box,#psRes .box,.fd-win,.svFold,.svFold .tab,#game .gmMenu'
-    +'{background:rgba(6,6,6,'+(.09+.19*a).toFixed(2)+') !important}';
+    +'{background:rgba('+G+','+((.09+.19*a)*(LUXON?1.9:1)).toFixed(2)+') !important}';
 }
 applyGlass();
 /* 拉条走过的那一段是用背景渐变画的，分界点存在 --rv 里；这里统一喂值。
@@ -9358,7 +9586,7 @@ function graphInner(){
   return '<div class="gph-hint">人物图谱：常现之人系于本体、结成一张网——节点=人物名牌（状态灯示好感 <span style="color:#ecc878">金亲</span>·<span style="color:#c99b3f">褐平</span>·<span style="color:#c8402e">赤疏</span>），同幕共处者细线互连（虚线=仅一面之缘），孤身偶现者外环漂浮。名牌可拖拽、轻点开人物档案——手机双指、电脑 Ctrl+滚轮放大细看，拖背景平移。</div>'
     +'<div id="zjGraphWrap" style="position:relative;overflow:hidden">'
     +'<svg id="zjGraphSvg" data-bw="'+W+'" data-bh="'+H+'" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;touch-action:none">'+lines+center+nodes+'</svg>'
-    +'<span data-act="graphZoomReset" class="btn" style="position:absolute;right:8px;bottom:8px;font-size:11px;letter-spacing:.15em;color:var(--mut);background:rgba(6,6,6,.85);border:1px solid rgba(236,236,232,.25);padding:3px 10px;cursor:pointer">复位</span>'
+    +'<span data-act="graphZoomReset" class="btn" style="position:absolute;right:8px;bottom:8px;font-size:11px;letter-spacing:.15em;color:var(--mut);background:var(--t-bg0,rgba(6,6,6,.85));border:1px solid var(--br,rgba(236,236,232,.25));padding:3px 10px;cursor:pointer">复位</span>'
     +'</div>'+resetLine;
 }
 function gphMark(){ /* 选中态即时刷（fd窗开关/◀▶切换时调用，不整树重渲） */
@@ -10771,11 +10999,11 @@ function svDiscMake(){
     var rr=R*(.30+ri/20*.70),n=Math.max(6,Math.round(rr/(2.8*DPR)));
     for(var k=0;k<n;k++){
       var aa=k/n*Math.PI*2+ri*.21,d=(1-ri/20)*.55+.16;
-      g.fillStyle='rgba(216,216,212,'+(d*(.25+svRnd(ri*97+k,11)*.5)).toFixed(3)+')';
+      g.fillStyle=CO('rgba(216,216,212,')+(d*(.25+svRnd(ri*97+k,11)*.5)).toFixed(3)+')';
       g.fillRect(cx+Math.cos(aa)*rr,cy+Math.sin(aa)*rr,1.5*DPR,1.5*DPR);
     }
   }
-  g.strokeStyle='rgba(236,236,232,.16)';g.lineWidth=DPR;
+  g.strokeStyle=CO('rgba(236,236,232,.16)');g.lineWidth=DPR;
   g.beginPath();g.arc(cx,cy,R*.42,0,Math.PI*2);g.stroke();
   SVDISC=c;
 }
@@ -10811,7 +11039,7 @@ function svFx(t){
     var r1=L.r1*DIAG;
     var ca=Math.cos(aa),sa=Math.sin(aa);
     /* 底线：全长连续、恒在（不断线） */
-    g.strokeStyle='rgba(236,236,232,'+(L.al*sh*.72).toFixed(3)+')';
+    g.strokeStyle=CO('rgba(236,236,232,')+(L.al*sh*.72).toFixed(3)+')';
     g.lineWidth=L.w*DPR*.8;
     g.beginPath();g.moveTo(cx+ca*r0,cy+sa*r0);g.lineTo(cx+ca*r1,cy+sa*r1);g.stroke();
     /* 高光：沿同一条线由内向外加速奔行＝穿梭动感（叠加在底线上，底线不受影响） */
@@ -10820,14 +11048,14 @@ function svFx(t){
     if(h1>r1)h1=r1;
     var hf=Math.sin(Math.PI*hp);                    /* 正弦包络：进出皆平滑，无突现突灭 */
     if(hf>.02){
-      g.strokeStyle='rgba(244,244,240,'+(L.al*.80*hf).toFixed(3)+')';
+      g.strokeStyle=CO('rgba(244,244,240,')+(L.al*.80*hf).toFixed(3)+')';
       g.lineWidth=L.w*DPR*1.0;
       g.beginPath();g.moveTo(cx+ca*h0,cy+sa*h0);g.lineTo(cx+ca*h1,cy+sa*h1);g.stroke();
     }
   }
   for(var q=0;q<SVLS.length;q++){
     var S=SVLS[q],x=((S.x+t*S.sp)%1-.05)*W,y=S.y*H,ln=S.len*W;
-    g.strokeStyle='rgba(236,236,232,'+S.al.toFixed(3)+')';g.lineWidth=DPR*.8;
+    g.strokeStyle=CO('rgba(236,236,232,')+S.al.toFixed(3)+')';g.lineWidth=DPR*.8;
     g.beginPath();g.moveTo(x,y);g.lineTo(x+ln,y);
     g.moveTo(x-W,y);g.lineTo(x-W+ln,y);      /* 环绕副本：卷回不闪断 */
     g.stroke();
@@ -11695,7 +11923,7 @@ function mvLayout(){
     var th=(C.h||1)/R, lum=[], q;
     for(q=0;q<=4;q++){
       var dl=(q/4-.5)*th*180/Math.PI;
-      lum.push('rgba(0,0,0,'+(0.94*(1-Math.pow(clamp01(Math.cos((a+dl)*Math.PI/180)),.9))).toFixed(3)+') '+(q*25)+'%');
+      lum.push('rgba(74,58,36,'+((LUXON?0.40:0.94)*(1-Math.pow(clamp01(Math.cos((a+dl)*Math.PI/180)),.9))).toFixed(3)+') '+(q*25)+'%');
     }
     C.fr.style.filter='brightness('+(.46+.54*Math.pow(clamp01(c),.7)).toFixed(3)+')';
     C.shade.style.background='linear-gradient(to bottom,'+lum.join(',')+')';
@@ -11715,7 +11943,7 @@ function mvRailDraw(){
   g.clearRect(0,0,W,H);
   var m=H*.08,span=H-2*m,x=W*.5;
   g.lineWidth=1;
-  g.strokeStyle='rgba(217,217,212,.42)';
+  g.strokeStyle=CO('rgba(217,217,212,.42)');
   g.beginPath();g.moveTo(x,m);g.lineTo(x,H-m);g.stroke();
   var sel=mvWrap(Math.round(MV.pos));
   for(var i=0;i<MV.n;i++){
@@ -11726,8 +11954,8 @@ function mvRailDraw(){
   var f=MV.n>1?Math.max(0,Math.min(1,mvWrap(MV.pos)/(MV.n-1))):.5;
   var fy=m+span*f;
   g.beginPath();g.arc(x,fy,4.2*d,0,Math.PI*2);
-  g.fillStyle='rgba(6,6,6,.9)';g.fill();
-  g.strokeStyle='rgba(236,236,232,.9)';g.stroke();
+  g.fillStyle=CO('rgba(6,6,6,.9)');g.fill();
+  g.strokeStyle=CO('rgba(236,236,232,.9)');g.stroke();
 }
 function mvBgDraw(now){
   if(!MV.bgx)return;
@@ -11889,10 +12117,10 @@ function railMapThumb(){
   var cx=W/2,cy=H/2,R=Math.min(W,H)*.42;
   var lonC=GAME.lon||0,tilt=(GAME.tilt==null?.42:GAME.tilt),ctl=Math.cos(tilt),stl=Math.sin(tilt);
   var hg=g.createRadialGradient(cx,cy,0,cx,cy,R*1.14);
-  hg.addColorStop(0,'rgba(255,148,38,0)');
-  hg.addColorStop(.84,'rgba(255,148,38,0)');
-  hg.addColorStop(.90,'rgba(255,148,38,.28)');
-  hg.addColorStop(1,'rgba(255,148,38,0)');
+  hg.addColorStop(0,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.84,CO('rgba(255,148,38,0)'));
+  hg.addColorStop(.90,CO('rgba(255,148,38,.28)'));
+  hg.addColorStop(1,CO('rgba(255,148,38,0)'));
   g.fillStyle=hg;g.beginPath();g.arc(cx,cy,R*1.14,0,Math.PI*2);g.fill();
   var eraRed=ERA.year>=-27&&ERA.year<=395;
   for(var i=0;i<LANDPTS.length;i++){
@@ -11941,14 +12169,14 @@ function rail3dThumb(){
   /* 示意：一条地平线 + 几道退远的横线，与选局那张山脉底同一种笔触 */
   g.clearRect(0,0,W,H);
   var hor=H*.52,r;
-  g.strokeStyle='rgba(156,156,152,.34)';g.lineWidth=1;
+  g.strokeStyle=CO('rgba(156,156,152,.34)');g.lineWidth=1;
   g.beginPath();g.moveTo(0,hor);g.lineTo(W,hor);g.stroke();
   for(r=1;r<=5;r++){
     var y=hor+Math.pow(r/5,1.7)*(H-hor-2);
-    g.strokeStyle='rgba(156,156,152,'+(.26-r*.04).toFixed(2)+')';
+    g.strokeStyle=CO('rgba(156,156,152,')+(.26-r*.04).toFixed(2)+')';
     g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
   }
-  g.fillStyle='rgba(201,155,63,.55)';
+  g.fillStyle=CO('rgba(201,155,63,.55)');
   g.fillRect(W*.34,hor-9,2,9);g.fillRect(W*.46,hor-14,2,14);g.fillRect(W*.60,hor-7,2,7);
 }
 function railSync(){
