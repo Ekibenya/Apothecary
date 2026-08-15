@@ -3813,85 +3813,124 @@ var FCPTS=[];
   var sd=20240815;
   function R(){sd=(sd*1664525+1013904223)&0x7fffffff;return sd/0x7fffffff;}
   function P(x,y,z,c,b){FCPTS.push({x:x,y:y,z:z,c:c,b:b||1});}
-  function edge(B,D){                       /* 矩形周边取一点 */
-    var t=R()*2*(B+D);
+  /* 精细感不靠点多，靠点站得整齐：看得清的构件全走等距——
+     檐口一圈、正脊一条、台沿一方、柱列一排。随机散点只拿来垫面。 */
+  function line(a,b,n,c,br,j){j=j||0;
+    for(var k=0;k<n;k++){var t=(k+.5)/n;
+      P(a[0]+(b[0]-a[0])*t+(R()-.5)*j,a[1]+(b[1]-a[1])*t+(R()-.5)*j,
+        a[2]+(b[2]-a[2])*t+(R()-.5)*j,c,br);}}
+  function rect(cx,cz,B,D,y,st,c,br){
+    var i,n1=Math.max(2,Math.round(2*B/st)),n2=Math.max(2,Math.round(2*D/st));
+    for(i=0;i<n1;i++){var x=-B+2*B*(i+.5)/n1;P(cx+x,y,cz-D,c,br);P(cx+x,y,cz+D,c,br);}
+    for(i=0;i<n2;i++){var z=-D+2*D*(i+.5)/n2;P(cx-B,y,cz+z,c,br);P(cx+B,y,cz+z,c,br);}}
+  function edge(B,D){var t=R()*2*(B+D);
     if(t<2*B)return [(t/B-1)*B,(R()<.5?-1:1)*D];
-    return [(R()<.5?-1:1)*B,((t-2*B)/D-1)*D];
-  }
-  /* 一座殿：台基、柱墙、屋顶。屋顶还是那两笔——举折的弧、翼角的翘，
-     只是这里一座殿不过百十个点，收着画。 */
-  function hall(cx,cz,B,D,y0,y1,y2,n,o){
-    o=o||{};var i,e;
-    for(i=0;i<(n*.20|0);i++){e=edge(B*1.12,D*1.18);P(cx+e[0],y0*R(),cz+e[1],2);}
-    for(i=0;i<(n*.18|0);i++){e=edge(B,D);P(cx+e[0],y0+(y1-y0)*R(),cz+e[1],0);}
-    var Br=o.pyr?0:Math.max(B*.16,B-D*.92),up=(o.up==null?.34:o.up);
-    for(i=0;i<(n*.50|0);i++){
-      var s=Math.pow(R(),1.5),Xs=B+(Br-B)*s,Zs=D*(1-s);
-      var y=y1+(y2-y1)*Math.pow(s,1.5),x3,z3,cn,ox=0,oz=0,sg;
-      if(R()<Xs/(Xs+Zs)){sg=R()<.5?-1:1;z3=sg*Zs;x3=(R()*2-1)*Xs;cn=Math.abs(x3)/(Xs+1e-6);oz=sg;}
-      else{sg=R()<.5?-1:1;x3=sg*Xs;z3=(R()*2-1)*Zs;cn=Math.abs(z3)/(Zs+1e-6);ox=sg;}
-      var c=Math.max(0,(cn-.50)/.50),f=(1-s)*c*c*up*D;
-      P(cx+x3+ox*f,y+f*1.3,cz+z3+oz*f,1,1.18);
+    return [(R()<.5?-1:1)*B,((t-2*B)/D-1)*D];}
+
+  /* 一座殿：台沿（白）→ 前檐柱列（红）→ 檐口带翼角起翘（金）→
+     屋面垫底 → 正脊两头鸱吻、四条垂脊（金，最亮）。 */
+  function hall(cx,cz,B,D,y0,y1,y2,o){
+    o=o||{};var i;
+    rect(cx,cz,B*1.10,D*1.16,y0,.015,2,.9);
+    if(!o.nc){var m=Math.max(4,Math.round(B/.015));
+      for(i=0;i<m;i++){var x=-B+2*B*(i+.5)/m;
+        line([cx+x,y0,cz+D],[cx+x,y1,cz+D],3,0,.85);}}
+    var nf=(o.f==null?24:o.f);
+    for(i=0;i<nf;i++){var e=edge(B,D);P(cx+e[0],y0+(y1-y0)*R(),cz+e[1],0,.5);}
+    var Br=o.pyr?0:Math.max(B*.16,B-D*.92),up=(o.up==null?.4:o.up);
+    var per=2*(B+D),ne=Math.max(10,Math.round(per/.011));
+    for(i=0;i<ne;i++){var t=(i+.5)/ne*per,x2,z2,cn;
+      if(t<2*B){x2=t-B;z2=D;cn=Math.abs(x2)/B;}
+      else if(t<2*B+2*D){x2=B;z2=D-(t-2*B);cn=Math.abs(z2)/D;}
+      else if(t<4*B+2*D){x2=B-(t-2*B-2*D);z2=-D;cn=Math.abs(x2)/B;}
+      else{x2=-B;z2=-D+(t-4*B-2*D);cn=Math.abs(z2)/D;}
+      var c2=Math.max(0,(cn-.55)/.45);
+      P(cx+x2,y1+c2*c2*up*D,cz+z2,1,1.05);}
+    var nr=(o.r==null?40:o.r);
+    for(i=0;i<nr;i++){var s2=Math.pow(R(),1.5),Xs=B+(Br-B)*s2,Zs=D*(1-s2);
+      var e2=edge(Xs,Zs);P(cx+e2[0],y1+(y2-y1)*Math.pow(s2,1.5),cz+e2[1],1,.55);}
+    var CN=[[B,D],[B,-D],[-B,D],[-B,-D]];
+    if(o.pyr){
+      for(i=0;i<4;i++)line([cx+CN[i][0],y1,cz+CN[i][1]],[cx,y2,cz],
+                           Math.max(4,Math.round(B/.011)+3),1,1.2);
+      P(cx,y2+.008,cz,1,1.8);P(cx,y2+.015,cz,1,1.5);
+    }else{
+      line([cx-Br,y2,cz],[cx+Br,y2,cz],Math.max(4,Math.round(2*Br/.009)),1,1.5);
+      P(cx-Br,y2+.010,cz,1,1.9);P(cx+Br,y2+.010,cz,1,1.9);
+      for(i=0;i<4;i++)line([cx+(CN[i][0]>0?Br:-Br),y2,cz],
+                           [cx+CN[i][0],y1+up*D*.35,cz+CN[i][1]],
+                           Math.max(3,Math.round(D/.011)+3),1,1.05);
     }
-    for(i=0;i<(n*.12|0);i++)                /* 正脊：全殿最亮的一条 */
-      P(cx+(R()*2-1)*(Br||D*.10),y2,cz+(R()-.5)*D*.12,1,1.6);
-  }
-  function tier(cx,cz,B,D,y,n){             /* 台：汉白玉，只画沿口 */
-    for(var i=0;i<n;i++){var e=edge(B,D);P(cx+e[0],y*(.15+.85*R()),cz+e[1],2);}
   }
 
-  /* 护城河：外围一圈水，宫城浮在当中 */
-  for(var i=0;i<680;i++){var e=edge(.585,.725);
-    P(e[0]*(1+(R()-.5)*.05),0,e[1]*(1+(R()-.5)*.05),3,.5);}
-  /* 城墙 + 垛口 */
-  for(i=0;i<1400;i++){var e2=edge(.50,.64);P(e2[0],R()*.058,e2[1],0,.60);}
-  for(i=0;i<480;i++){var e3=edge(.50,.64);P(e3[0],.058+R()*.014,e3[1],0,.82);}
-  /* 四座角楼：紫禁城最认得出来的剪影 */
+  var i;
+  /* 护城河（暗）·城墙一圈·垛口等距 */
+  for(i=0;i<520;i++){var e=edge(.585,.725);
+    P(e[0]*(1+(R()-.5)*.04),0,e[1]*(1+(R()-.5)*.04),3,.45);}
+  for(i=0;i<900;i++){var e2=edge(.50,.64);P(e2[0],R()*.056,e2[1],0,.55);}
+  rect(0,0,.50,.64,.060,.011,0,.9);
+  rect(0,0,.485,.625,.050,.020,0,.65);
+  /* 四座角楼：十字脊 */
   [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(function(c){
-    hall(c[0]*.50,c[1]*.64,.052,.052,.058,.105,.150,150,{up:.55});
-    hall(c[0]*.50,c[1]*.64,.036,.036,.150,.150,.196,70,{pyr:1,up:.6});
+    var tx=c[0]*.50,tz=c[1]*.64;
+    hall(tx,tz,.050,.050,.060,.108,.150,{up:.55,f:14,r:22});
+    line([tx,.150,tz-.046],[tx,.150,tz+.046],9,1,1.2);
   });
-  /* 午门：凹字形城台，上头五凤楼 */
-  for(i=0;i<300;i++){var u=R()*2-1;P(u*.17,R()*.085,-.64+R()*.03,0);}
-  for(i=0;i<220;i++){var sd2=R()<.5?-1:1;P(sd2*(.145+R()*.028),R()*.085,-.64+R()*.115,0);}
-  hall(0,-.632,.072,.026,.085,.120,.163,190,{up:.5});
+  /* 午门：凹字城台·正楼·四座方亭·三道门洞 */
+  for(i=0;i<260;i++){var u=R()*2-1;P(u*.17,R()*.082,-.64+R()*.03,0,.6);}
+  for(i=0;i<200;i++){var s3=R()<.5?-1:1;P(s3*(.145+R()*.026),R()*.082,-.64+R()*.11,0,.6);}
+  rect(0,-.64,.17,.015,.085,.012,2,.8);
+  hall(0,-.632,.072,.024,.085,.118,.162,{up:.5});
   [[-.148,-.545],[.148,-.545],[-.148,-.598],[.148,-.598]].forEach(function(q){
-    hall(q[0],q[1],.028,.024,.085,.112,.146,80,{pyr:1,up:.6});});
-  /* 太和门 */
-  hall(0,-.44,.115,.042,.014,.052,.094,240,{up:.42});
-  /* 三台：三大殿共坐的那方汉白玉 */
-  tier(0,-.115,.225,.185,.052,760);
-  /* 三大殿 */
-  hall(0,-.235,.170,.072,.052,.108,.152,520,{up:.40});   /* 太和殿：下檐 */
-  hall(0,-.235,.138,.056,.152,.152,.205,380,{up:.44});   /* 太和殿：上檐 */
-  hall(0,-.100,.056,.056,.052,.096,.146,290,{pyr:1,up:.55}); /* 中和殿：攒尖 */
-  hall(0,.028,.130,.058,.052,.100,.150,420,{up:.42});    /* 保和殿 */
-  /* 乾清门、后三宫 */
-  hall(0,.158,.088,.032,.010,.044,.080,180,{up:.44});
-  hall(0,.272,.112,.048,.016,.062,.106,300,{up:.42});
-  hall(0,.360,.042,.042,.016,.058,.100,190,{pyr:1,up:.55});
-  hall(0,.448,.112,.048,.016,.062,.106,300,{up:.42});
-  /* 御花园：钦安殿一座，四下点些树 */
-  hall(0,.556,.040,.034,.012,.048,.086,150,{pyr:1,up:.55});
-  for(i=0;i<200;i++)P((R()*2-1)*.20,R()*.052,.52+R()*.10,3,.8);
-  /* 神武门 */
-  hall(0,.638,.108,.036,.058,.096,.140,280,{up:.44});
-  /* 东华门、西华门 */
-  [-1,1].forEach(function(sd3){hall(sd3*.50,0,.032,.070,.058,.092,.132,150,{up:.46});});
-  /* 东西六宫：一边六座院落，这故事真正的地界 */
-  [-1,1].forEach(function(sd4){
+    hall(q[0],q[1],.026,.022,.085,.110,.144,{pyr:1,f:10,r:14});});
+  [-.05,0,.05].forEach(function(dx){
+    line([dx-.013,0,-.655],[dx-.013,.052,-.655],4,2,.9);
+    line([dx+.013,0,-.655],[dx+.013,.052,-.655],4,2,.9);
+    line([dx-.013,.052,-.655],[dx+.013,.052,-.655],3,2,.9);});
+  /* 内金水河：一张弓，五道桥 */
+  var xw=.20;
+  for(i=0;i<84;i++){var t3=(i+.5)/84,x3=-xw+2*xw*t3;
+    var z3=-.505+.028*Math.cos(x3/xw*Math.PI/2);
+    P(x3,.002,z3,3,.5);if(i%2)P(x3,.002,z3+.014,3,.35);}
+  [-.132,-.066,0,.066,.132].forEach(function(bx){
+    var zb=-.505+.028*Math.cos(bx/xw*Math.PI/2)+.007;
+    line([bx-.008,.006,zb-.016],[bx-.008,.006,zb+.016],4,2,1);
+    line([bx+.008,.006,zb-.016],[bx+.008,.006,zb+.016],4,2,1);});
+  /* 太和门 → 三台 → 三大殿 */
+  hall(0,-.44,.115,.040,.014,.052,.092,{up:.42});
+  rect(0,-.115,.225,.185,.020,.013,2,.8);
+  rect(0,-.115,.208,.168,.037,.013,2,.85);
+  rect(0,-.115,.191,.151,.054,.013,2,.9);
+  for(i=0;i<170;i++){var e4=edge(.20,.16);P(e4[0],.054*R(),-.115+e4[1],2,.45);}
+  hall(0,-.235,.170,.070,.054,.106,.146,{up:.40,f:40,r:56});
+  hall(0,-.235,.136,.054,.146,.150,.204,{up:.44,nc:1,f:0,r:36});
+  hall(0,-.100,.055,.055,.054,.094,.144,{pyr:1,up:.55});
+  hall(0,.028,.128,.056,.054,.098,.148,{up:.42});
+  /* 廊庑：前朝大院两翼的连房 */
+  [-1,1].forEach(function(s6){
+    line([s6*.30,.030,-.40],[s6*.30,.030,.10],46,0,.7);
+    line([s6*.285,.052,-.40],[s6*.285,.052,.10],46,1,.6);});
+  /* 乾清门 → 后三宫 → 御花园 → 神武门 */
+  hall(0,.158,.086,.030,.010,.044,.078,{up:.44,f:16,r:22});
+  hall(0,.272,.110,.046,.016,.060,.104,{up:.42});
+  hall(0,.360,.040,.040,.016,.056,.098,{pyr:1,f:12,r:16});
+  hall(0,.448,.110,.046,.016,.060,.104,{up:.42});
+  hall(0,.556,.038,.032,.012,.046,.084,{pyr:1,f:10,r:12});
+  for(i=0;i<150;i++)P((R()*2-1)*.20,R()*.05,.52+R()*.10,3,.6);
+  hall(0,.638,.106,.034,.058,.094,.138,{up:.44});
+  /* 东华门·西华门 */
+  [-1,1].forEach(function(s7){hall(s7*.50,0,.030,.068,.058,.090,.130,{up:.46,f:12,r:16});});
+  /* 东西六宫：一边六座院——院墙一圈，正房一座 */
+  [-1,1].forEach(function(s4){
     [.215,.345].forEach(function(cxx){
       [.208,.330,.452].forEach(function(czz){
-        for(var q2=0;q2<52;q2++){var e4=edge(.052,.046);
-          P(sd4*cxx+e4[0],R()*.030,czz+e4[1],0,.85);}
-        hall(sd4*cxx,czz,.036,.020,.030,.052,.082,80,{up:.5});
-      });
-    });
-  });
-  /* 外朝的文华殿、武英殿 */
-  [-1,1].forEach(function(sd5){hall(sd5*.335,-.335,.052,.036,.014,.050,.088,160,{up:.46});});
-  /* 御道：一条中轴，从午门通到神武门 */
-  for(i=0;i<220;i++)P((R()-.5)*.030,.001,-.60+R()*1.24,3,.75);
+        rect(s4*cxx,czz,.050,.044,.028,.015,0,.75);
+        hall(s4*cxx,czz,.034,.018,.028,.048,.076,{f:8,r:10,up:.5});});});});
+  /* 文华殿·武英殿 */
+  [-1,1].forEach(function(s5){hall(s5*.335,-.335,.050,.034,.014,.048,.084,{up:.46,f:12,r:16});});
+  /* 御道：两条镶边，从午门通到神武门 */
+  for(i=0;i<110;i++){var t2=(i+.5)/110;
+    P(-.012,.001,-.60+1.24*t2,3,.6);P(.012,.001,-.60+1.24*t2,3,.6);}
 })();
 function menuDraw(){
   if(ERA.on){eraDraw();return;}
@@ -3909,17 +3948,8 @@ function menuDraw(){
   miEl.style.translate=(PX*34)+'px '+(PY*22)+'px';       /* options: nearest layer, moves most */
   mfEl.style.translate=(PX*12)+'px '+(PY*8)+'px';
   mg.clearRect(0,0,mW,mH);
-  /* 天光：檐上一层暖晕，从屋脊那一带浮起来 */
-  var gy=mH*.36-PY*mH*.008,gx=mW/2-PX*mW*.008;
-  var grd=mg.createRadialGradient(gx,gy,0,gx,gy,mH*.42);
-  grd.addColorStop(0,CD('212,166,72',(.10+.03*Math.sin(mt*.0011)).toFixed(3)));
-  grd.addColorStop(1,CO('rgba(212,166,72,0)'));
-  mg.fillStyle=grd;mg.fillRect(0,0,mW,mH);
-  var hg=mg.createRadialGradient(cx,cyc-S*.34,0,cx,cyc-S*.34,S*.95);
-  hg.addColorStop(0,CO('rgba(255,148,38,.18)'));
-  hg.addColorStop(.55,CO('rgba(255,148,38,.09)'));
-  hg.addColorStop(1,CO('rgba(255,148,38,0)'));
-  mg.fillStyle=hg;mg.fillRect(0,0,mW,mH);
+  /* 不铺光晕。径向渐变到边上会显出一个圆盘的轮廓——建筑是方的，
+     背后印个圆就像贴错的月亮。暖意交给粒子自己的亮度分层。 */
   /* 一万多个点，逐点拼 rgba 字符串是 WebKit 上的死穴（地球那会儿栽过一次）。
      照旧走分桶：透明度量化成 32 档，同桶一次 fill。 */
   for(var i=0;i<FCPTS.length;i++){
@@ -3928,7 +3958,7 @@ function menuDraw(){
     var sxp=cx+Xr*S,syp=cyc-(p.y*ctl+Zr*stl)*S;
     var dep=.66-Zr*.40;                                  /* 越往北越远，越淡；底子留住，不然后半座全黑 */
     var a=Math.max(.10,Math.min(.94,dep*p.b));
-    var sz2=(p.c===1?1.35:1.12)*DPR*(.78+.44*dep);
+    var sz2=(p.c===1?1.22:1.02)*DPR*(.78+.44*dep);
     GB_push(p.c,(a*GB_N)|0,sxp,syp,sz2,sz2);
   }
   GB_flush(mg);
@@ -3937,11 +3967,11 @@ function menuDraw(){
   var pox=PX*22*DPR,poy=PY*14*DPR;                    /* title parallax layer */
   /* dark backing plate lifts the lettering off the map */
   var bx=mW/2+pox,by=mH*.36+poy;
-  var bg2=mg.createRadialGradient(bx,by,0,bx,by,mH*.30);
-  bg2.addColorStop(0,CO('rgba(6,6,6,.78)'));
-  bg2.addColorStop(.7,CO('rgba(6,6,6,.45)'));
+  var bg2=mg.createLinearGradient(0,by-mH*.24,0,by+mH*.24);
+  bg2.addColorStop(0,CO('rgba(6,6,6,0)'));
+  bg2.addColorStop(.5,CO('rgba(6,6,6,.62)'));
   bg2.addColorStop(1,CO('rgba(6,6,6,0)'));
-  mg.fillStyle=bg2;mg.fillRect(bx-mH*.5,by-mH*.30,mH,mH*.6);
+  mg.fillStyle=bg2;mg.fillRect(0,by-mH*.24,mW,mH*.48);
   mg.globalCompositeOperation=CMP();
   var settled2=mt>2000;
   for(var ti=0;ti<MTP.length;ti++){
