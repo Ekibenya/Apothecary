@@ -3799,6 +3799,100 @@ function GB_flush(g){
     b.length=0;
   }
 }
+/* ── 粒子紫禁城 ──────────────────────────────────────────────────────
+   封面本来是一颗点阵地球。可这故事从头到尾没迈出过宫墙一步，背后摆颗
+   地球实在不知所云，换成紫禁城：中轴一线从午门排到神武门，东西六宫分
+   列两厢——后宫本来就是这故事的全部地界。
+   配色直接借现成的四个粒子桶，正好对上「红墙黄瓦白台基」：
+     0 朱红＝城墙宫墙与柱   1 亮金＝黄琉璃瓦顶
+     2 琥珀＝汉白玉台基     3 暗金＝地面、护城河、院落
+   主题一换 GB_BUILD 会重建这四色，奶油版跟着走，不用另接一套。
+   坐标：x 东西（±0.50 到城墙），z 南北（午门 -0.64 → 神武门 0.64），y 高。 */
+var FCPTS=[];
+(function(){
+  var sd=20240815;
+  function R(){sd=(sd*1664525+1013904223)&0x7fffffff;return sd/0x7fffffff;}
+  function P(x,y,z,c,b){FCPTS.push({x:x,y:y,z:z,c:c,b:b||1});}
+  function edge(B,D){                       /* 矩形周边取一点 */
+    var t=R()*2*(B+D);
+    if(t<2*B)return [(t/B-1)*B,(R()<.5?-1:1)*D];
+    return [(R()<.5?-1:1)*B,((t-2*B)/D-1)*D];
+  }
+  /* 一座殿：台基、柱墙、屋顶。屋顶还是那两笔——举折的弧、翼角的翘，
+     只是这里一座殿不过百十个点，收着画。 */
+  function hall(cx,cz,B,D,y0,y1,y2,n,o){
+    o=o||{};var i,e;
+    for(i=0;i<(n*.20|0);i++){e=edge(B*1.12,D*1.18);P(cx+e[0],y0*R(),cz+e[1],2);}
+    for(i=0;i<(n*.18|0);i++){e=edge(B,D);P(cx+e[0],y0+(y1-y0)*R(),cz+e[1],0);}
+    var Br=o.pyr?0:Math.max(B*.16,B-D*.92),up=(o.up==null?.34:o.up);
+    for(i=0;i<(n*.50|0);i++){
+      var s=Math.pow(R(),1.5),Xs=B+(Br-B)*s,Zs=D*(1-s);
+      var y=y1+(y2-y1)*Math.pow(s,1.5),x3,z3,cn,ox=0,oz=0,sg;
+      if(R()<Xs/(Xs+Zs)){sg=R()<.5?-1:1;z3=sg*Zs;x3=(R()*2-1)*Xs;cn=Math.abs(x3)/(Xs+1e-6);oz=sg;}
+      else{sg=R()<.5?-1:1;x3=sg*Xs;z3=(R()*2-1)*Zs;cn=Math.abs(z3)/(Zs+1e-6);ox=sg;}
+      var c=Math.max(0,(cn-.50)/.50),f=(1-s)*c*c*up*D;
+      P(cx+x3+ox*f,y+f*1.3,cz+z3+oz*f,1,1.18);
+    }
+    for(i=0;i<(n*.12|0);i++)                /* 正脊：全殿最亮的一条 */
+      P(cx+(R()*2-1)*(Br||D*.10),y2,cz+(R()-.5)*D*.12,1,1.6);
+  }
+  function tier(cx,cz,B,D,y,n){             /* 台：汉白玉，只画沿口 */
+    for(var i=0;i<n;i++){var e=edge(B,D);P(cx+e[0],y*(.15+.85*R()),cz+e[1],2);}
+  }
+
+  /* 护城河：外围一圈水，宫城浮在当中 */
+  for(var i=0;i<680;i++){var e=edge(.585,.725);
+    P(e[0]*(1+(R()-.5)*.05),0,e[1]*(1+(R()-.5)*.05),3,.5);}
+  /* 城墙 + 垛口 */
+  for(i=0;i<1400;i++){var e2=edge(.50,.64);P(e2[0],R()*.058,e2[1],0,.60);}
+  for(i=0;i<480;i++){var e3=edge(.50,.64);P(e3[0],.058+R()*.014,e3[1],0,.82);}
+  /* 四座角楼：紫禁城最认得出来的剪影 */
+  [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(function(c){
+    hall(c[0]*.50,c[1]*.64,.052,.052,.058,.105,.150,150,{up:.55});
+    hall(c[0]*.50,c[1]*.64,.036,.036,.150,.150,.196,70,{pyr:1,up:.6});
+  });
+  /* 午门：凹字形城台，上头五凤楼 */
+  for(i=0;i<300;i++){var u=R()*2-1;P(u*.17,R()*.085,-.64+R()*.03,0);}
+  for(i=0;i<220;i++){var sd2=R()<.5?-1:1;P(sd2*(.145+R()*.028),R()*.085,-.64+R()*.115,0);}
+  hall(0,-.632,.072,.026,.085,.120,.163,190,{up:.5});
+  [[-.148,-.545],[.148,-.545],[-.148,-.598],[.148,-.598]].forEach(function(q){
+    hall(q[0],q[1],.028,.024,.085,.112,.146,80,{pyr:1,up:.6});});
+  /* 太和门 */
+  hall(0,-.44,.115,.042,.014,.052,.094,240,{up:.42});
+  /* 三台：三大殿共坐的那方汉白玉 */
+  tier(0,-.115,.225,.185,.052,760);
+  /* 三大殿 */
+  hall(0,-.235,.170,.072,.052,.108,.152,520,{up:.40});   /* 太和殿：下檐 */
+  hall(0,-.235,.138,.056,.152,.152,.205,380,{up:.44});   /* 太和殿：上檐 */
+  hall(0,-.100,.056,.056,.052,.096,.146,290,{pyr:1,up:.55}); /* 中和殿：攒尖 */
+  hall(0,.028,.130,.058,.052,.100,.150,420,{up:.42});    /* 保和殿 */
+  /* 乾清门、后三宫 */
+  hall(0,.158,.088,.032,.010,.044,.080,180,{up:.44});
+  hall(0,.272,.112,.048,.016,.062,.106,300,{up:.42});
+  hall(0,.360,.042,.042,.016,.058,.100,190,{pyr:1,up:.55});
+  hall(0,.448,.112,.048,.016,.062,.106,300,{up:.42});
+  /* 御花园：钦安殿一座，四下点些树 */
+  hall(0,.556,.040,.034,.012,.048,.086,150,{pyr:1,up:.55});
+  for(i=0;i<200;i++)P((R()*2-1)*.20,R()*.052,.52+R()*.10,3,.8);
+  /* 神武门 */
+  hall(0,.638,.108,.036,.058,.096,.140,280,{up:.44});
+  /* 东华门、西华门 */
+  [-1,1].forEach(function(sd3){hall(sd3*.50,0,.032,.070,.058,.092,.132,150,{up:.46});});
+  /* 东西六宫：一边六座院落，这故事真正的地界 */
+  [-1,1].forEach(function(sd4){
+    [.215,.345].forEach(function(cxx){
+      [.208,.330,.452].forEach(function(czz){
+        for(var q2=0;q2<52;q2++){var e4=edge(.052,.046);
+          P(sd4*cxx+e4[0],R()*.030,czz+e4[1],0,.85);}
+        hall(sd4*cxx,czz,.036,.020,.030,.052,.082,80,{up:.5});
+      });
+    });
+  });
+  /* 外朝的文华殿、武英殿 */
+  [-1,1].forEach(function(sd5){hall(sd5*.335,-.335,.052,.036,.014,.050,.088,160,{up:.46});});
+  /* 御道：一条中轴，从午门通到神武门 */
+  for(i=0;i<220;i++)P((R()-.5)*.030,.001,-.60+R()*1.24,3,.75);
+})();
 function menuDraw(){
   if(ERA.on){eraDraw();return;}
   var now=performance.now(),mt=now-MENU.t0;
@@ -3806,79 +3900,36 @@ function menuDraw(){
   var _pt=parTarget(),tx=_pt[0],ty=_pt[1];
   PX+=(tx-PX)*(REDUCED?1:.06);PY+=(ty-PY)*(REDUCED?1:.06);
   if(REDUCED){PX=0;PY=0;}
-  /* globe: oversized bleed layout — sphere bigger than the frame, centre pushed
-     up-left so the limb crops off top/bottom and the disc fills the scene */
-  /* STEM framing: sphere centre far left-of-centre, LEFT + TOP limbs cropped
-     off-frame — what reads is the bright lower-right limb crescent, with dark
-     sky on the right for future HUD */
-  var cx=mW*.26-PX*mW*.011,cy=mH*.47-PY*mH*.011,R=mH*.62;
-  miEl.style.translate=(PX*34)+'px '+(PY*22)+'px';         /* options: nearest layer, moves most */
+  /* 紫禁城：南面（午门）朝着看的人，整座慢慢摆一点角度，
+     像一具会呼吸的木模型。不做整圈旋转——正脸转过去就没法看了。 */
+  var sway=REDUCED?0:Math.sin(mt*.000082)*.15;
+  var yaw=.34+sway,cyw=Math.cos(yaw),syw=Math.sin(yaw);
+  var tl=.62,ctl=Math.cos(tl),stl=Math.sin(tl);          /* 俯角压平些：看得见格局，屋顶也还留得住剪影 */
+  var S=mH*.63,cx=mW*.50-PX*mW*.011,cyc=mH*.63-PY*mH*.011;
+  miEl.style.translate=(PX*34)+'px '+(PY*22)+'px';       /* options: nearest layer, moves most */
   mfEl.style.translate=(PX*12)+'px '+(PY*8)+'px';
   mg.clearRect(0,0,mW,mH);
-  /* light bloom behind the title (GIF-1 style volumetric glow) */
-  var gy=mH*.36-PY*mH*.008,gx=mW/2-PX*mW*.008;          /* bloom stays with the title, not the globe */
+  /* 天光：檐上一层暖晕，从屋脊那一带浮起来 */
+  var gy=mH*.36-PY*mH*.008,gx=mW/2-PX*mW*.008;
   var grd=mg.createRadialGradient(gx,gy,0,gx,gy,mH*.42);
   grd.addColorStop(0,CD('212,166,72',(.10+.03*Math.sin(mt*.0011)).toFixed(3)));
   grd.addColorStop(1,CO('rgba(212,166,72,0)'));
   mg.fillStyle=grd;mg.fillRect(0,0,mW,mH);
-  /* particle Earth — orthographic, opens parked on Europe then slow spin */
-  var spin=REDUCED?0:Math.max(0,mt-1600)*.000042;
-  var lonC=15*Math.PI/180+spin;                /* Europe ≈15°E faces the camera first */
-  var tilt=.50,ctl=Math.cos(tilt),stl=Math.sin(tilt);  /* deeper tilt keeps Europe in the visible band */
-  var cs=Math.cos(lonC),sn=Math.sin(lonC);
-  /* halo: annulus glow hugging the limb only — inside stays pure black */
-  /* amber-orange rim glow only — no drawn limb circle; the crescent is carried
-     purely by the glow and the rim-lit dots */
-  var hg=mg.createRadialGradient(cx,cy,0,cx,cy,R*1.12);
-  hg.addColorStop(0,CO('rgba(255,148,38,0)'));
-  hg.addColorStop(.86,CO('rgba(255,148,38,0)'));
-  hg.addColorStop(.905,CO('rgba(255,148,38,.20)'));
+  var hg=mg.createRadialGradient(cx,cyc-S*.34,0,cx,cyc-S*.34,S*.95);
+  hg.addColorStop(0,CO('rgba(255,148,38,.18)'));
+  hg.addColorStop(.55,CO('rgba(255,148,38,.09)'));
   hg.addColorStop(1,CO('rgba(255,148,38,0)'));
-  mg.fillStyle=hg;mg.beginPath();mg.arc(cx,cy,R*1.12,0,Math.PI*2);mg.fill();
-  /* geodesic shell: DETACHED from the dot sphere — larger radius, so the mesh
-     floats past the limb and fills the dark sky upper-right (STEM look) */
-  var RG=R*1.32;
-  mg.strokeStyle=CO('rgba(201,155,63,.09)');
-  mg.beginPath();
-  for(var ge=0;ge<GEO.length;ge++){
-    var E=GEO[ge],q=[null,null],vis=true;
-    for(var en=0;en<2;en++){
-      var v=E[en];
-      var Xg=v[0]*cs+v[2]*sn,Zg=-v[0]*sn+v[2]*cs,Yg=v[1];
-      var Yt=Yg*ctl-Zg*stl,Zt=Yg*stl+Zg*ctl;
-      if(Zt<-.06){vis=false;break;}
-      q[en]=[cx+Xg*RG,cy-Yt*RG];
-    }
-    if(vis){mg.moveTo(q[0][0],q[0][1]);mg.lineTo(q[1][0],q[1][1]);}
-  }
-  mg.stroke();
-  /* land dots: aligned bands, depth-faded (moiré-killer), per-dot brightness variance.
-     Empire dots are saturated signal red, plain land is dimmed gold — strong split */
-  for(var i=0;i<LANDPTS.length;i++){
-    var p=LANDPTS[i],lam=p.lo-lonC;
-    var Xr=p.cl*Math.sin(lam),Zr=p.cl*Math.cos(lam),Yr=p.sy;
-    var Y2=Yr*ctl-Zr*stl,Z2=Yr*stl+Zr*ctl;
-    if(Z2<=0)continue;                                 /* dark far side = contrast */
-    var sx=cx+Xr*R,sy2=cy-Y2*R;
-    /* 三万五千个点，逐点算出一个 rgba 字符串再赋给 fillStyle——那等于每帧做
-       一万七千次字符串拼接与 CSS 颜色解析。Chrome 把这条路优化得看不出来，
-       WebKit（Safari／Tauri 的 WKWebView）没有，于是同一份代码在 Mac 上
-       整屏发木。改法是把透明度量化成十六档、按档分桶，每帧只设十六次
-       fillStyle、每桶一次 fill()——画面几乎无差，调用量降到千分之一。 */
-    if(p.rome){
-      var ar=.5+.5*Z2;
-      var sr=1.6*DPR*(.8+.35*Z2);
-      GB_push(0,(ar*GB_N)|0,sx,sy2,sr,sr);
-    }else if(p.hi){
-      var ah=Math.min(1,(.2+.6*Z2)*1.4);
-      GB_push(1,(ah*GB_N)|0,sx-1*DPR,sy2-1*DPR,2.6*DPR,2.6*DPR);
-    }else{
-      /* rim light: grazing-angle dots brighten toward the limb (STEM crescent) */
-      var rim=Math.pow(1-Z2,5)*.38;
-      var a=Math.min(1,(.10+.5*Z2)*p.br+rim);
-      var s=1.15*DPR*(.75+.4*Z2);
-      GB_push(rim>.12?2:3,(a*GB_N)|0,sx,sy2,s,s);
-    }
+  mg.fillStyle=hg;mg.fillRect(0,0,mW,mH);
+  /* 一万多个点，逐点拼 rgba 字符串是 WebKit 上的死穴（地球那会儿栽过一次）。
+     照旧走分桶：透明度量化成 32 档，同桶一次 fill。 */
+  for(var i=0;i<FCPTS.length;i++){
+    var p=FCPTS[i];
+    var Xr=p.x*cyw+p.z*syw,Zr=-p.x*syw+p.z*cyw;
+    var sxp=cx+Xr*S,syp=cyc-(p.y*ctl+Zr*stl)*S;
+    var dep=.66-Zr*.40;                                  /* 越往北越远，越淡；底子留住，不然后半座全黑 */
+    var a=Math.max(.10,Math.min(.94,dep*p.b));
+    var sz2=(p.c===1?1.35:1.12)*DPR*(.78+.44*dep);
+    GB_push(p.c,(a*GB_N)|0,sxp,syp,sz2,sz2);
   }
   GB_flush(mg);
 
