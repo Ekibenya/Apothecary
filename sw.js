@@ -1,13 +1,16 @@
 /* LVZHI.SYS · service worker
    壳层预缓存 + 其余按需缓存。素材总量近 200MB（三维包与乐曲），一次性全预下载既慢又
    会撑爆配额，所以只预存「打得开」所需的那几个档，其余用过哪个存哪个。 */
-var V = 'lvzhi-v1';
+/* 换图标那次踩的坑：图标走下面「缓存优先」那条分支，而这个版本号一直没动过，
+   activate 里「删掉版本不符的缓存」就永远不触发——新图标推上去了，用户看到的
+   还是缓存里的旧的。凡是动了 SHELL 里的档，这里必须跟着改。 */
+var V = 'lvzhi-v2';
 var SHELL = [
   '/',
   '/manifest.webmanifest',
-  '/core/res/icon/favicon.svg',
-  '/core/res/icon/icon-192.png',
-  '/core/res/icon/icon-512.png'
+  '/core/res/icon/favicon.svg?v=2',
+  '/core/res/icon/icon-192.png?v=2',
+  '/core/res/icon/icon-512.png?v=2'
 ];
 
 self.addEventListener('install', function (e) {
