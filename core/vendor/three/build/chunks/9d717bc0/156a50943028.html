@@ -2324,92 +2324,83 @@ var FAM   =['LIBERA','FELIS','FELIS','FELIS','FELIS','FELIS','FELIS',
             'FELIS','FELIS','FELIS','FELIS','FELIS','FELIS'];
 /* deterministic RNG per column so layouts are stable across sessions */
 function colPts(i){
-  /* 品种猫耳点云。原来这里是一排罗马柱式（多立克、爱奥尼……），
-     药屋卡换成十三只猫：头是一枚球壳，耳朵按品种给参——
-     折耳前扑、卷耳后翻、英短圆顶、兔狲低圆、缅因带毛缨、无毛猫薄而巨。
-     坐标制式不动：x/z ±0.15，y 0 落地 1 顶天，hi 是亮点。 */
+  /* 品种粒子猫耳。不画头——一张卡就是一对猫耳，品种差异全在耳形：
+     折耳前扑、卷耳后翻、英短圆顶、兔狲低圆、缅因毛缨、无毛猫薄而巨。
+     每只耳带一圈内耳轮廓线。坐标制式不动：x/z ±0.15，y 0 落地 1 顶天，hi 亮点。 */
   var seed=i*7.31+3.7;
   function rnd(){seed=Math.sin(seed*127.1+311.7)*43758.5453;return seed-Math.floor(seed);}
   var pts=[];
   function push(x,y,z,hi){pts.push({x:x,y:y,z:z,hi:hi||rnd()<.05});}
-  function head(n,cy,r,fw,fh){                /* 头：椭球壳 */
-    for(var k=0;k<n;k++){var th=rnd()*Math.PI*2,ph=Math.acos(2*rnd()-1);
-      push(r*fw*Math.sin(ph)*Math.cos(th),cy+r*fh*Math.cos(ph),r*.88*Math.sin(ph)*Math.sin(th));}
+  function bend(o,t,y,z){                      /* 折耳/卷耳共用的耳尖弯折 */
+    if(o.fold&&t>0.58){var q=(t-0.58)*3.2,hy=0.58*o.h,dy=y-hy;
+      y=hy+dy*Math.cos(q*1.5);z+=dy*Math.sin(q*1.5)+0.012;}
+    if(o.curl&&t>0.62){var q2=(t-0.62)*3.0,hy2=0.62*o.h,dy2=y-hy2;
+      y=hy2+dy2*Math.cos(q2*1.6);z-=dy2*Math.sin(q2*1.6);}
+    return [y,z];
   }
-  function fuzz(n,cy,r,fw,fh,d){              /* 长毛：沿头壳外一圈散点 */
-    for(var k=0;k<n;k++){var th=rnd()*Math.PI*2,ph=Math.acos(2*rnd()-1);
-      var rr=1+rnd()*d;
-      push(r*fw*rr*Math.sin(ph)*Math.cos(th),cy+r*fh*rr*Math.cos(ph),r*.88*rr*Math.sin(ph)*Math.sin(th));}
+  function shape(o,t){                         /* 耳宽随高度收束；圆耳把尖收成圆顶 */
+    var w=o.wb*(1-t*(o.round?0.60:0.90));
+    var y=t*o.h;
+    if(o.round&&t>0.7){var tt=(t-0.7)/0.3;
+      y=0.7*o.h+Math.sin(tt*Math.PI/2)*0.3*o.h*0.9;
+      w*=1-tt*0.5;}
+    return [w,y];
   }
-  function ear(n,sd,o){                       /* 一只耳朵。sd=±1，o 是品种参数 */
-    var la=(o.lean||0);
-    var cs=Math.cos(la),sn=Math.sin(la)*sd;
-    for(var k=0;k<n;k++){
-      var t=rnd();
-      var w=o.wb*(1-t*(o.round?0.62:0.92));
-      var u=(rnd()*2-1)*w/2;
-      var y=t*o.h;
-      if(o.round&&t>0.7){var tt=(t-0.7)/0.3;   /* 圆耳：耳尖收成圆顶 */
-        y=0.7*o.h+Math.sin(tt*Math.PI/2)*0.3*o.h*0.9;
-        u*=1-tt*0.55;}
-      var z=(rnd()*2-1)*(o.zth||0.026)*(1-t*0.7);
-      if(o.fold&&t>0.58){var q=(t-0.58)*3.2;   /* 折耳：耳尖向前扑倒 */
-        var hy=0.58*o.h,dy=y-hy;
-        y=hy+dy*Math.cos(q*1.5);z+=dy*Math.sin(q*1.5)+0.010;}
-      if(o.curl&&t>0.62){var q2=(t-0.62)*3.0;  /* 卷耳：耳尖向后翻卷 */
-        var hy2=0.62*o.h,dy2=y-hy2;
-        y=hy2+dy2*Math.cos(q2*1.6);z-=dy2*Math.sin(q2*1.6);}
-      push(o.bx*sd+u*cs+y*sn, o.by+y*cs-u*sn, z);
+  function ear(n,sd,o){                        /* 一只耳。sd=±1 */
+    var la=(o.lean||0),cs=Math.cos(la),sn=Math.sin(la)*sd;
+    function put(u,y,z,hi){u+=sd*y*(o.sk||0);   /* 剪切：耳尖朝外上斜，内缘立得住——猫耳不是山 */
+      push(o.bx*sd+u*cs+y*sn, o.by+y*cs-u*sn, z, hi);}
+    for(var k=0;k<n;k++){                      /* 耳体：满填充，边缘更密 */
+      var t=rnd(),sw=shape(o,t),w=sw[0],yy=sw[1];
+      var u=(rnd()*2-1);u=(u<0?-1:1)*Math.pow(Math.abs(u),.62)*w/2;
+      var z=(rnd()*2-1)*(o.zth||0.030)*(1-t*0.7);
+      var bz=bend(o,t,yy,z);
+      put(u,bz[0],bz[1]);
     }
-    if(o.tuft){                                /* 缅因那类猞猁耳缨：耳尖冒一小簇 */
-      var tx=o.bx*sd+o.h*sn, ty=o.by+o.h*cs;
-      for(var q3=0;q3<26;q3++){var tt2=rnd();
-        push(tx+(rnd()-.5)*.016+sd*tt2*.018, ty+tt2*.075, (rnd()-.5)*.016, tt2>.45);}
+    for(var k2=0;k2<(n*0.5|0);k2++){           /* 内耳：0.52 倍的轮廓线，一圈 */
+      var t2=rnd(),sw2=shape(o,t2),w2=sw2[0]*.52,y2=sw2[1]*.52+o.h*.10;
+      var edge=rnd()<.5?-1:1;
+      var u2=edge*w2/2*(0.92+rnd()*.16);
+      if(t2>.9)u2*=rnd();                       /* 靠尖处闭合 */
+      var bz2=bend(o,t2*.52+.10,y2,.012);
+      put(u2,bz2[0],bz2[1],rnd()<.12);
+    }
+    if(o.fz)for(var k3=0;k3<o.fz;k3++){        /* 长毛耳：沿外缘炸毛 */
+      var t3=rnd(),sw3=shape(o,t3),w3=sw3[0],y3=sw3[1];
+      var edge3=rnd()<.5?-1:1;
+      var u3=edge3*(w3/2+rnd()*.020);
+      var bz3=bend(o,t3,y3,(rnd()-.5)*.03);
+      put(u3,bz3[0],bz3[1]);
+    }
+    if(o.tuft){                                /* 猞猁耳缨：耳尖冒一小簇 */
+      var tx=o.h*sn+sd*o.h*(o.sk||0), ty=o.by+o.h*cs;
+      for(var q3=0;q3<30;q3++){var tt2=rnd();
+        push(o.bx*sd+tx+(rnd()-.5)*.018+sd*tt2*.022, ty+tt2*.09, (rnd()-.5)*.018, tt2>.45);}
     }
   }
-  function whiskers(cy,r){                     /* 胡须：左右各三根 */
-    var dirs=[-.22,-.02,.16];
-    for(var sd=-1;sd<=1;sd+=2)for(var l=0;l<3;l++)for(var k2=0;k2<11;k2++){
-      var t=rnd();
-      push(sd*(r*.5+t*.17), cy-.02+t*.15*dirs[l], (rnd()-.5)*.018);
-    }
-  }
-  function eyes(cy,r){                         /* 一对眼点：亮 */
-    for(var sd=-1;sd<=1;sd+=2)for(var k3=0;k3<7;k3++)
-      push(sd*r*.40+(rnd()-.5)*.018, cy+.028+(rnd()-.5)*.014, r*.62+(rnd()-.5)*.012, true);
-  }
-  /* 品种参数表。cy 头心高度，r 头半径，fw/fh 头宽高系数；
-     ers={h 耳高,wb 耳基宽,bx 耳根横距,lean 外倾,round 圆耳,fold 折耳,curl 卷耳,tuft 耳缨,zth 耳厚} */
-  function cat(o){
-    head(o.hn||760,o.cy,o.r,o.fw||1,o.fh||1);
-    if(o.fz)fuzz(o.fz,o.cy,o.r,o.fw||1,o.fh||1,o.fd||.12);
-    var e=o.ers;e.by=o.cy+o.r*(o.fh||1)*.72;
-    ear(o.en||280,-1,e);ear(o.en||280,1,e);
-    whiskers(o.cy,o.r*(o.fw||1));
-    eyes(o.cy,o.r*(o.fw||1));
-  }
+  /* 品种参数：h 耳高，wb 基宽，bx 双耳横距，by 耳根高度，lean 外倾，
+     round 圆耳，fold 折耳，curl 卷耳，tuft 耳缨，fz 炸毛，zth 耳厚 */
   var B={
-  CONDITOR:  {cy:.40,r:.205,ers:{h:.36,wb:.23,bx:.115,lean:.16,zth:.040}},
-  FOLD:      {cy:.40,r:.225,fw:1.05,ers:{h:.22,wb:.24,bx:.115,lean:.10,fold:1,zth:.046}},
-  ORIENTAL:  {cy:.34,r:.180,fw:.94,fh:1.06,ers:{h:.44,wb:.26,bx:.095,lean:.30,zth:.036}},
-  CVRL:      {cy:.40,r:.200,ers:{h:.38,wb:.22,bx:.105,lean:.18,curl:1,zth:.040}},
-  COON:      {cy:.40,r:.215,fz:190,fd:.10,ers:{h:.40,wb:.235,bx:.110,lean:.22,tuft:1,zth:.046}},
-  SPHYNX:    {cy:.36,r:.185,fh:1.04,ers:{h:.46,wb:.30,bx:.100,lean:.34,zth:.024}},
-  BRITANNIA: {cy:.42,r:.230,fw:1.08,ers:{h:.26,wb:.22,bx:.130,lean:.24,round:1,zth:.048}},
-  MANVL:     {cy:.43,r:.235,fw:1.14,fh:.86,fz:230,fd:.14,ers:{h:.17,wb:.20,bx:.155,lean:.45,round:1,zth:.046}},
-  PERSIA:    {cy:.41,r:.225,fw:1.06,fz:260,fd:.15,ers:{h:.21,wb:.19,bx:.120,lean:.18,round:1,zth:.042}},
-  ABYSSINIA: {cy:.37,r:.195,fh:1.04,ers:{h:.42,wb:.25,bx:.105,lean:.28,zth:.036}},
-  DEVON:     {cy:.37,r:.190,ers:{h:.40,wb:.32,bx:.105,lean:.40,zth:.034}},
-  SIBERIA:   {cy:.40,r:.215,fz:230,fd:.13,ers:{h:.33,wb:.23,bx:.112,lean:.20,tuft:1,zth:.046}},
-  SINGAPVRA: {cy:.38,r:.170,fw:.98,ers:{h:.42,wb:.24,bx:.092,lean:.26,zth:.036}}
+  CONDITOR:  {h:.52,wb:.34,bx:.185,by:.16,lean:.12,sk:.03,zth:.038},
+  FOLD:      {h:.36,wb:.36,bx:.195,by:.20,lean:.08,sk:.02,fold:1,zth:.046},
+  ORIENTAL:  {h:.62,wb:.34,bx:.185,by:.11,lean:.10,sk:.03,zth:.034},
+  CVRL:      {h:.50,wb:.33,bx:.180,by:.16,lean:.12,sk:.03,curl:1,zth:.038},
+  COON:      {h:.55,wb:.35,bx:.190,by:.13,lean:.12,sk:.03,tuft:1,fz:120,zth:.042},
+  SPHYNX:    {h:.56,wb:.34,bx:.175,by:.12,lean:.10,sk:.03,zth:.020},
+  BRITANNIA: {h:.40,wb:.34,bx:.190,by:.19,lean:.13,sk:.02,round:1,zth:.046},
+  MANVL:     {h:.30,wb:.33,bx:.200,by:.21,lean:.16,sk:.02,round:1,fz:150,zth:.044},
+  PERSIA:    {h:.36,wb:.31,bx:.175,by:.19,lean:.11,sk:.02,round:1,fz:170,zth:.040},
+  ABYSSINIA: {h:.56,wb:.35,bx:.190,by:.12,lean:.11,sk:.03,zth:.034},
+  DEVON:     {h:.48,wb:.36,bx:.190,by:.13,lean:.13,sk:.03,zth:.032},
+  SIBERIA:   {h:.46,wb:.33,bx:.180,by:.16,lean:.12,sk:.03,tuft:1,fz:140,zth:.042},
+  SINGAPVRA: {h:.54,wb:.30,bx:.165,by:.12,lean:.10,sk:.03,zth:.032}
   };
   var o=B[ORDERS[i]]||B.CONDITOR;
-  cat(o);
-  if(ORDERS[i]==='CONDITOR'){                  /* 铸局那只：头顶一缕螺旋星火示「起造」 */
-    var top=o.cy+o.r+ .38;
-    for(var k4=0;k4<86;k4++){var tf=rnd(),af=tf*Math.PI*5.6;
-      var rf=.012+.052*(1-tf);
-      push(rf*Math.cos(af),top-.22+tf*.18,rf*Math.sin(af),tf>.5);}
+  ear(560,-1,o);ear(560,1,o);
+  if(ORDERS[i]==='CONDITOR'){                  /* 铸局：双耳之间一缕螺旋星火示「起造」 */
+    for(var k4=0;k4<90;k4++){var tf=rnd(),af=tf*Math.PI*5.6;
+      var rf=.014+.056*(1-tf);
+      push(rf*Math.cos(af),.30+tf*.42,rf*Math.sin(af),tf>.5);}
   }
   return pts;
 }
