@@ -101,18 +101,14 @@ def vtext(x, y, txt, sz, col, gap=14):
         w = bb[2] - bb[0]
         d.text((x - w / 2 - bb[0], y + i * (sz + gap)), ch, font=f, fill=col)
 
-vtext(cx + 250, 170, '藥屋', 210, GOLD_HI, 30)
-vtext(cx - 250, 240, '雀斑之下', 92, GOLD, 22)
+# 题字只有一个：作品名，竖排居中。副题一行，交代这是十二局的后宫毒药卡。
+vtext(cx + 150, 120, '薬屋の', 200, GOLD_HI, 26)
+vtext(cx - 150, 300, 'ひとりごと', 132, GOLD, 20)
 
 sub = '後宮 · 毒与藥 · 十二局'
 f = font(40)
 bb = d.textbbox((0, 0), sub, font=f)
 d.text(((W - bb[2] + bb[0]) / 2, H - 236), sub, font=f, fill=(150, 126, 74))
-
-f2 = font(26)
-lat = 'APOTHECA · MONOLOGVE'
-bb = d.textbbox((0, 0), lat, font=f2)
-d.text(((W - bb[2] + bb[0]) / 2, H - 180), lat, font=f2, fill=(96, 82, 50))
 
 # ── 轻微暗角 ──────────────────────────────────────────
 vig = Image.new('L', (W, H), 0)
