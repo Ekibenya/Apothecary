@@ -2218,7 +2218,7 @@ try{
 try{addEventListener('pagehide',_die);addEventListener('unload',_die);}catch(_){}
 /* ================= data: 16 openings (titles only — story modules not mounted) ================ */
 var OPS=[
- {id:"custom", cn:"铸局", code:"CONDERE", d:"—", era:"自定义 · 年代与地点由你定 ‖ 扮演·你写的那个人"},
+ {id:"custom", cn:"铸局", code:"CONDERE", d:"—", era:"自定义 · 地点由你定 ‖ 扮演·你写的那个人"},
 ];
 var N=OPS.length;
 var REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2318,117 +2318,102 @@ var track=$('#track'),cards=[];
    而这张表原本只有十七项——第 17 项往后 ORDERS[i] 是 undefined，
    colPts 的 switch 一条都不命中，最后四张卡的粒子数组是空的（柱子整根不见）。
    旧的十七种一个不动，只在后面接四种，并给 switch 补 default 兜底。 */
-var ORDERS=['CONDITOR','DORIC','IONIC','CORINTHIAN','TUSCAN','COMPOSITE','SOLOMONIC','TRAJAN','RUIN',
-            'MINOAN','OBELISK','PROTO-DORIC','LOTUS','PAPYRUS','PALM','ATTIC','AEOLIC',
-            'PERSEPOLITAN','HATHORIC','BYZANTINE','NABATAEAN'];
-var FAM   =['LIBERA','GREEK','GREEK','GREEK','ROMAN','ROMAN','ROMAN','ROMAN','GREEK',
-            'GREEK','EGYPTIAN','EGYPTIAN','EGYPTIAN','EGYPTIAN','EGYPTIAN','GREEK','GREEK',
-            'PERSIAN','EGYPTIAN','GREEK','ROMAN'];
+var ORDERS=['CONDITOR','FOLD','ORIENTAL','CVRL','COON','SPHYNX','BRITANNIA',
+            'MANVL','PERSIA','ABYSSINIA','DEVON','SIBERIA','SINGAPVRA'];
+var FAM   =['LIBERA','FELIS','FELIS','FELIS','FELIS','FELIS','FELIS',
+            'FELIS','FELIS','FELIS','FELIS','FELIS','FELIS'];
 /* deterministic RNG per column so layouts are stable across sessions */
 function colPts(i){
+  /* 品种猫耳点云。原来这里是一排罗马柱式（多立克、爱奥尼……），
+     药屋卡换成十三只猫：头是一枚球壳，耳朵按品种给参——
+     折耳前扑、卷耳后翻、英短圆顶、兔狲低圆、缅因带毛缨、无毛猫薄而巨。
+     坐标制式不动：x/z ±0.15，y 0 落地 1 顶天，hi 是亮点。 */
   var seed=i*7.31+3.7;
   function rnd(){seed=Math.sin(seed*127.1+311.7)*43758.5453;return seed-Math.floor(seed);}
   var pts=[];
-  function push(x,y,z,hi){pts.push({x:x,y:y,z:z,hi:hi||rnd()<.06});}
-  function rev(y,r,fl,fd,tw){                       /* surface of revolution, optional flutes/twist */
-    var th=rnd()*Math.PI*2+(tw||0)*y;
-    var rr=fl?r*(1-fd*(0.5+0.5*Math.cos(fl*th))):r;
-    push(rr*Math.cos(th),y,rr*Math.sin(th));
+  function push(x,y,z,hi){pts.push({x:x,y:y,z:z,hi:hi||rnd()<.05});}
+  function head(n,cy,r,fw,fh){                /* 头：椭球壳 */
+    for(var k=0;k<n;k++){var th=rnd()*Math.PI*2,ph=Math.acos(2*rnd()-1);
+      push(r*fw*Math.sin(ph)*Math.cos(th),cy+r*fh*Math.cos(ph),r*.88*Math.sin(ph)*Math.sin(th));}
   }
-  function sq(y,hw){                                /* square-plan perimeter (plinth/abacus/obelisk) */
-    var s=Math.floor(rnd()*4),u=rnd()*2-1;
-    var p=[[u*hw,hw],[hw,u*hw],[u*hw,-hw],[-hw,u*hw]][s];
-    push(p[0],y,p[1]);
+  function fuzz(n,cy,r,fw,fh,d){              /* 长毛：沿头壳外一圈散点 */
+    for(var k=0;k<n;k++){var th=rnd()*Math.PI*2,ph=Math.acos(2*rnd()-1);
+      var rr=1+rnd()*d;
+      push(r*fw*rr*Math.sin(ph)*Math.cos(th),cy+r*fh*rr*Math.cos(ph),r*.88*rr*Math.sin(ph)*Math.sin(th));}
   }
-  function shaft(n,y0,y1,r0,r1,fl,fd,tw){           /* tapered shaft with entasis bulge */
-    for(var k=0;k<n;k++){var y=y0+rnd()*(y1-y0),f=(y-y0)/(y1-y0);
-      rev(y,(r0+(r1-r0)*f)*(1+.04*Math.sin(Math.PI*f)),fl,fd,tw);}
+  function ear(n,sd,o){                       /* 一只耳朵。sd=±1，o 是品种参数 */
+    var la=(o.lean||0);
+    var cs=Math.cos(la),sn=Math.sin(la)*sd;
+    for(var k=0;k<n;k++){
+      var t=rnd();
+      var w=o.wb*(1-t*(o.round?0.62:0.92));
+      var u=(rnd()*2-1)*w/2;
+      var y=t*o.h;
+      if(o.round&&t>0.7){var tt=(t-0.7)/0.3;   /* 圆耳：耳尖收成圆顶 */
+        y=0.7*o.h+Math.sin(tt*Math.PI/2)*0.3*o.h*0.9;
+        u*=1-tt*0.55;}
+      var z=(rnd()*2-1)*(o.zth||0.026)*(1-t*0.7);
+      if(o.fold&&t>0.58){var q=(t-0.58)*3.2;   /* 折耳：耳尖向前扑倒 */
+        var hy=0.58*o.h,dy=y-hy;
+        y=hy+dy*Math.cos(q*1.5);z+=dy*Math.sin(q*1.5)+0.010;}
+      if(o.curl&&t>0.62){var q2=(t-0.62)*3.0;  /* 卷耳：耳尖向后翻卷 */
+        var hy2=0.62*o.h,dy2=y-hy2;
+        y=hy2+dy2*Math.cos(q2*1.6);z-=dy2*Math.sin(q2*1.6);}
+      push(o.bx*sd+u*cs+y*sn, o.by+y*cs-u*sn, z);
+    }
+    if(o.tuft){                                /* 缅因那类猞猁耳缨：耳尖冒一小簇 */
+      var tx=o.bx*sd+o.h*sn, ty=o.by+o.h*cs;
+      for(var q3=0;q3<26;q3++){var tt2=rnd();
+        push(tx+(rnd()-.5)*.016+sd*tt2*.018, ty+tt2*.075, (rnd()-.5)*.016, tt2>.45);}
+    }
   }
-  function ring(n,y,r){for(var k=0;k<n;k++)rev(y+(rnd()-.5)*.012,r);}
-  function volute(n,cx,cy){                         /* ionic scroll, front plane */
-    for(var k=0;k<n;k++){var t=rnd(),a=t*Math.PI*5.2;var rr=.055*(1-t*.82);
-      push(cx+rr*Math.sin(a),cy+rr*Math.cos(a)*.9,(rnd()-.5)*.02,t>.7);}
+  function whiskers(cy,r){                     /* 胡须：左右各三根 */
+    var dirs=[-.22,-.02,.16];
+    for(var sd=-1;sd<=1;sd+=2)for(var l=0;l<3;l++)for(var k2=0;k2<11;k2++){
+      var t=rnd();
+      push(sd*(r*.5+t*.17), cy-.02+t*.15*dirs[l], (rnd()-.5)*.018);
+    }
   }
-  function bell(n,y0,y1,r0,r1,leaf){                /* corinthian/papyrus flare */
-    for(var k=0;k<n;k++){var t=rnd(),y=y0+t*(y1-y0);
-      var r=r0+(r1-r0)*t*t;var th=rnd()*Math.PI*2;
-      if(leaf)r*=1+.13*Math.max(0,Math.sin(8*th+t*3))*t;
-      push(r*Math.cos(th),y,r*Math.sin(th));}
+  function eyes(cy,r){                         /* 一对眼点：亮 */
+    for(var sd=-1;sd<=1;sd+=2)for(var k3=0;k3<7;k3++)
+      push(sd*r*.40+(rnd()-.5)*.018, cy+.028+(rnd()-.5)*.014, r*.62+(rnd()-.5)*.012, true);
   }
-  function base(){for(var k=0;k<90;k++)sq(rnd()*.05,.115);ring(60,.075,.095);}
-  var R=.072,k;
-  switch(ORDERS[i]){
-    case 'CONDITOR':                /* 自定义之柱：三阶方座+阿提卡座环+凹槽柱身+钟形柱头方冠，柱顶一缕螺旋星火示「起造」 */
-      for(k=0;k<120;k++)sq(rnd()*.03,.13);            /* 方座下阶 */
-      for(k=0;k<90;k++)sq(.03+rnd()*.028,.117);       /* 方座中阶 */
-      for(k=0;k<70;k++)sq(.058+rnd()*.022,.105);      /* 方座上阶 */
-      ring(80,.088,.098);ring(64,.104,.086);          /* 座环：圆凸线脚两道 */
-      shaft(640,.115,.80,R+.006,R-.010,20,.10);       /* 凹槽柱身带卷杀 */
-      ring(72,.812,.081);                              /* 颈环 */
-      bell(150,.828,.885,R-.013,.106);                 /* 钟形柱头 */
-      for(k=0;k<110;k++)sq(.885+rnd()*.045,.114);      /* 方冠 */
-      for(k=0;k<86;k++){                               /* 起造星火：细螺旋自柱顶升起收束 */
-        var tf=rnd(),af=tf*Math.PI*5.6;
-        var rf=.012+.052*(1-tf);
-        push(rf*Math.cos(af),.935+tf*.10,rf*Math.sin(af),tf>.5);
-      }
-      break;
-    case 'ATTIC':
-    case 'DORIC':      base();shaft(650,.10,.84,R+.008,R-.010,20,.10);bell(120,.84,.90,R-.01,.10);for(k=0;k<130;k++)sq(.90+rnd()*.08,.112);break;
-    case 'AEOLIC':
-    case 'IONIC':      base();shaft(620,.10,.82,R,R-.012,24,.08);ring(70,.83,.085);volute(120,-.088,.90);volute(120,.088,.90);for(k=0;k<90;k++)sq(.955+rnd()*.045,.105);break;
-    case 'CORINTHIAN': base();shaft(560,.10,.78,R,R-.012,24,.08);bell(320,.78,.955,R-.012,.118,true);for(k=0;k<90;k++)sq(.955+rnd()*.045,.118);break;
-    case 'TUSCAN':     base();shaft(700,.10,.85,R+.01,R-.008);bell(110,.85,.92,R-.008,.095);ring(90,.945,.10);break;
-    case 'COMPOSITE':  base();shaft(560,.10,.78,R,R-.012,24,.08);bell(220,.78,.92,R-.012,.105,true);volute(90,-.085,.945);volute(90,.085,.945);for(k=0;k<70;k++)sq(.965+rnd()*.035,.11);break;
-    case 'SOLOMONIC':  base();shaft(760,.10,.86,R+.004,R-.006,0,0,9.5);bell(100,.86,.92,R-.006,.095);for(k=0;k<110;k++)sq(.92+rnd()*.06,.105);break;
-    case 'TRAJAN':     for(k=0;k<200;k++)sq(rnd()*.16,.105);shaft(520,.16,.86,R,R-.008);
-                       for(k=0;k<260;k++){var t=rnd(),y=.17+t*.67;var th=t*Math.PI*26;var r=(R-.008*((y-.16)/.7))+.006;push(r*Math.cos(th),y,r*Math.sin(th),rnd()<.25);}
-                       for(k=0;k<110;k++)sq(.90+rnd()*.07,.10);break;
-    case 'RUIN':       base();
-                       for(k=0;k<620;k++){var th2=rnd()*Math.PI*2,yb=.10+rnd()*.52;
-                         var cut=.50+.12*Math.sin(3*th2+1.3);if(yb>cut&&rnd()>.15)continue;
-                         var rr2=(R+.006-.014*(yb/.62))*(1-.10*(0.5+0.5*Math.cos(20*th2)));
-                         push(rr2*Math.cos(th2),yb,rr2*Math.sin(th2));}
-                       for(k=0;k<140;k++){var a2=rnd()*Math.PI*2,rr3=.12+rnd()*.10;push(rr3*Math.cos(a2),rnd()*.035,rr3*Math.sin(a2),rnd()<.04);}break;
-    case 'MINOAN':     ring(90,.05,.105);shaft(680,.07,.86,R-.022,R+.014);ring(140,.88,.115);for(k=0;k<110;k++)sq(.93+rnd()*.06,.118);break;
-    case 'OBELISK':    for(k=0;k<170;k++)sq(rnd()*.08,.125);
-                       for(k=0;k<720;k++){var y3=.08+rnd()*.77;sq(y3,.075-.03*((y3-.08)/.77));}
-                       for(k=0;k<180;k++){var y4=.85+rnd()*.15;sq(y4,Math.max(.002,.045*(1-(y4-.85)/.15)));}break;
-    case 'PROTO-DORIC':base();shaft(760,.10,.90,R+.006,R-.006,16,.16);for(k=0;k<120;k++)sq(.90+rnd()*.07,.10);break;
-    case 'LOTUS':      base();shaft(600,.10,.80,R,R-.010,8,.18);
-                       for(k=0;k<300;k++){var t5=rnd(),y5=.80+t5*.18;
-                         var r5=.062+.048*Math.sin(t5*Math.PI*.9)-(t5>.8?(t5-.8)*.22:0);rev(y5,Math.max(.02,r5),8,.14);}break;
-    case 'PAPYRUS':    ring(80,.03,.095);shaft(540,.05,.80,R-.018,R-.004,8,.12);bell(340,.80,.97,R-.004,.135);ring(90,.975,.138);break;
-    case 'PALM':       base();shaft(640,.10,.84,R,R-.008);ring(80,.85,.08);
-                       for(var fr=0;fr<9;fr++){var fa=fr*Math.PI*2/9+.2;
-                         for(k=0;k<26;k++){var t6=k/26+rnd()*.02;
-                           var rr6=t6*.115,y6=.86+.13*Math.sin(Math.min(1,t6)*2.4)-.05*t6*t6;
-                           push(rr6*Math.cos(fa)+(rnd()-.5)*.008,y6,rr6*Math.sin(fa)+(rnd()-.5)*.008,t6>.75);}}break;
-    /* —— 以下四种是开局加到二十局之后补的，用的还是上面那几个基元 —— */
-    case 'PERSEPOLITAN':  /* 波斯：细高柱身四十八道浅槽，双涡卷柱头 */
-                       base();shaft(720,.10,.86,R-.012,R-.020,48,.06);ring(60,.866,.062);
-                       volute(110,-.070,.905);volute(110,.070,.905);
-                       for(k=0;k<90;k++)sq(.940+rnd()*.040,.100);break;
-    case 'HATHORIC':      /* 埃及：素柱身托一整块方形柱头，颈下一道环 */
-                       base();shaft(600,.10,.800,R,R-.006);ring(70,.808,.084);
-                       for(k=0;k<200;k++)sq(.820+rnd()*.100,.122);
-                       ring(80,.925,.118);break;
-    case 'BYZANTINE':     /* 拜占庭：篮式柱头，上压一块冲力方石 */
-                       base();shaft(560,.10,.780,R,R-.014);ring(60,.788,.076);
-                       bell(300,.790,.905,R-.014,.116,true);
-                       for(k=0;k<120;k++)sq(.905+rnd()*.055,.112);break;
-    case 'NABATAEAN':     /* 佩特拉：矮壮柱身，素喇叭柱头加两层方冠 */
-                       for(k=0;k<140;k++)sq(rnd()*.06,.128);
-                       shaft(680,.06,.800,R+.014,R+.002);
-                       bell(130,.800,.875,R+.002,.108);
-                       for(k=0;k<110;k++)sq(.875+rnd()*.030,.118);
-                       for(k=0;k<80;k++)sq(.905+rnd()*.030,.106);break;
-    default:              /* 表再被超出也不许出现空柱：退回托斯卡纳 */
-                       base();shaft(700,.10,.85,R+.01,R-.008);bell(110,.85,.92,R-.008,.095);
-                       ring(90,.945,.10);break;
+  /* 品种参数表。cy 头心高度，r 头半径，fw/fh 头宽高系数；
+     ers={h 耳高,wb 耳基宽,bx 耳根横距,lean 外倾,round 圆耳,fold 折耳,curl 卷耳,tuft 耳缨,zth 耳厚} */
+  function cat(o){
+    head(o.hn||760,o.cy,o.r,o.fw||1,o.fh||1);
+    if(o.fz)fuzz(o.fz,o.cy,o.r,o.fw||1,o.fh||1,o.fd||.12);
+    var e=o.ers;e.by=o.cy+o.r*(o.fh||1)*.72;
+    ear(o.en||280,-1,e);ear(o.en||280,1,e);
+    whiskers(o.cy,o.r*(o.fw||1));
+    eyes(o.cy,o.r*(o.fw||1));
+  }
+  var B={
+  CONDITOR:  {cy:.40,r:.205,ers:{h:.36,wb:.23,bx:.115,lean:.16,zth:.040}},
+  FOLD:      {cy:.40,r:.225,fw:1.05,ers:{h:.22,wb:.24,bx:.115,lean:.10,fold:1,zth:.046}},
+  ORIENTAL:  {cy:.34,r:.180,fw:.94,fh:1.06,ers:{h:.44,wb:.26,bx:.095,lean:.30,zth:.036}},
+  CVRL:      {cy:.40,r:.200,ers:{h:.38,wb:.22,bx:.105,lean:.18,curl:1,zth:.040}},
+  COON:      {cy:.40,r:.215,fz:190,fd:.10,ers:{h:.40,wb:.235,bx:.110,lean:.22,tuft:1,zth:.046}},
+  SPHYNX:    {cy:.36,r:.185,fh:1.04,ers:{h:.46,wb:.30,bx:.100,lean:.34,zth:.024}},
+  BRITANNIA: {cy:.42,r:.230,fw:1.08,ers:{h:.26,wb:.22,bx:.130,lean:.24,round:1,zth:.048}},
+  MANVL:     {cy:.43,r:.235,fw:1.14,fh:.86,fz:230,fd:.14,ers:{h:.17,wb:.20,bx:.155,lean:.45,round:1,zth:.046}},
+  PERSIA:    {cy:.41,r:.225,fw:1.06,fz:260,fd:.15,ers:{h:.21,wb:.19,bx:.120,lean:.18,round:1,zth:.042}},
+  ABYSSINIA: {cy:.37,r:.195,fh:1.04,ers:{h:.42,wb:.25,bx:.105,lean:.28,zth:.036}},
+  DEVON:     {cy:.37,r:.190,ers:{h:.40,wb:.32,bx:.105,lean:.40,zth:.034}},
+  SIBERIA:   {cy:.40,r:.215,fz:230,fd:.13,ers:{h:.33,wb:.23,bx:.112,lean:.20,tuft:1,zth:.046}},
+  SINGAPVRA: {cy:.38,r:.170,fw:.98,ers:{h:.42,wb:.24,bx:.092,lean:.26,zth:.036}}
+  };
+  var o=B[ORDERS[i]]||B.CONDITOR;
+  cat(o);
+  if(ORDERS[i]==='CONDITOR'){                  /* 铸局那只：头顶一缕螺旋星火示「起造」 */
+    var top=o.cy+o.r+ .38;
+    for(var k4=0;k4<86;k4++){var tf=rnd(),af=tf*Math.PI*5.6;
+      var rf=.012+.052*(1-tf);
+      push(rf*Math.cos(af),top-.22+tf*.18,rf*Math.sin(af),tf>.5);}
   }
   return pts;
 }
+
 function scatterCard(C){
   var now=performance.now();C.t0=now;
   for(var k=0;k<C.pts.length;k++){var p=C.pts[k],c=C.cur[k];
@@ -2779,7 +2764,7 @@ function opsFromCard(line){
      卡里的正史开局排在它后面。少了这一张，环上每张卡的标号会整体错一位
      （第一局会被标成 CONDERE），而年代闸门那条路也就没有入口了。 */
   var head=[{id:'custom',cn:'铸局',code:'CONDERE',d:'—',
-             era:'自定义 · 年代与地点由你定 ‖ 扮演·你写的那个人'}];
+             era:'自定义 · 地点由你定 ‖ 扮演·你写的那个人'}];
   return head.concat(src.map(function(o){
     var y=o.year||0;
     return {id:o.id,cn:o.scene,
@@ -2797,8 +2782,9 @@ function rebuildRing(line){
 function engage(){
   if(linked)return;
   var i=mod(Math.round(pos),N),o=OPS[i];
-  if(o.id==='custom'){                 /* 自定义开局：年份 → 地球选地 → 人物 */
-    ebShow('year');                    /* 弹窗直接盖在选局环上，背景不退回菜单 */
+  if(o.id==='custom'){                 /* 自定义开局：地球选地 → 人物。年代不再询问，固定御极七年 */
+    if(!MENU.on)menuEnter();           /* 地球选地在菜单层进行 */
+    eraEnter(7);
     return;
   }
   /* ring → 简介确认弹窗，再入局 */
@@ -3586,7 +3572,7 @@ function prOpen(){
   var ln=RING_LINE||'luzhi';
   var nm=ERA.sel?(ERA.sel.n+'　'+ERA.sel.cn):('KYO JO　京城');
   var who='';try{who=String($('#pfNomen').value||'').trim();}catch(_){}
-  $('#prSub').textContent=fmtYear(y)+'　·　'+nm+(who?('　·　'+who):'');
+  $('#prSub').textContent=nm+(who?('　·　'+who):'');
   prEl.style.display='flex';
   var ta=$('#pfScene');if(ta)setTimeout(function(){try{ta.focus();}catch(_){}},60);
 }
@@ -3626,7 +3612,7 @@ function eraEnter(y){
   ERA.year=y;ERA.lon=15*Math.PI/180;ERA.vel=0;ERA.t0=performance.now();
   ERA.zoom=1;ERA.pts={};ERA.pinch=0;ERA.tilt=.42;
   ERA.act=buildActs(y);
-  $('#ehYear').textContent=(y<0?(-y)+' A.C.N.':'A.D. '+y);
+  $('#ehYear').textContent=fmtYear(y);
   ERA.on=true;mOv.classList.add('era');
 }
 function eraExit(){ERA.on=false;mOv.classList.remove('era');menuScatter();MENU.t0=performance.now();}
