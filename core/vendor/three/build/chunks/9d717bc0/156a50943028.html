@@ -1624,9 +1624,9 @@ html.lux #pnTx #zjScene3D>canvas,html.lux #pnTx #mdScene3D>canvas,html.lux #pnTx
 <div id="intro">
   <canvas id="introCv"></canvas>
   <div class="iEyebrow">─&nbsp;&nbsp;薬屋のひとりごと&nbsp;&nbsp;─</div>
-  <div class="iSub">VNVS&nbsp;SOL&nbsp;IN&nbsp;CAELO&nbsp;·&nbsp;VNVS&nbsp;DOMINVS&nbsp;IN&nbsp;TERRA</div>
+  <div class="iSub">後宮&nbsp;·&nbsp;毒与藥&nbsp;·&nbsp;十二局</div>
   <div class="iBtn" id="iBtn" tabindex="0">INTRARE</div>
-  <div class="iFoot">CAELO&nbsp;AETERNO&nbsp;VOLENTE&nbsp;&nbsp;·&nbsp;&nbsp;MMXXIX</div>
+  <div class="iFoot">御极七年–九年&nbsp;·&nbsp;茘国后宫</div>
 </div>
 
 <div id="game">
@@ -1975,7 +1975,7 @@ html.lux #pnTx #zjScene3D>canvas,html.lux #pnTx #mdScene3D>canvas,html.lux #pnTx
     <span class="tag">LIBER</span>
     <h2>资料库&nbsp;[DB]&nbsp;·&nbsp;世界书</h2>
     <div class="cxTabs">
-      <span class="cxTab on" data-side="luzhi">藥屋</span>
+      <span class="cxTab on" data-side="luzhi">薬屋のひとりごと</span>
     </div>
     <div class="cxWrap">
       <div class="cxCats" id="cxCats"></div>
@@ -2863,7 +2863,7 @@ function size(){
 /* 片名。粒子标题（片头与主菜单）逐字采样成点阵，两处共用这一个数组。
    原来两处各写死 ['K','H','A','N']，宽度算式里还跟着一个写死的 sp*3——
    换片名要改两处，字数一变间距还算错。这里出一份，字数随便。 */
-var TITLE_CHARS=['藥','屋','少','女'];   /* 药屋片头。片头与主菜单共用 */
+var TITLE_CHARS=['薬','屋','の','ひ','と','り','ご','と'];   /* 片名。片头与主菜单共用 */
 
 /* ================= INTRO: SPQR warp gate ================= */
 var INTRO={on:true,exiting:false,t0:performance.now()};
@@ -2895,12 +2895,12 @@ function introText(){
   var og=oc.getContext('2d');
   og.fillStyle='#000';og.fillRect(0,0,tw,th);
   og.fillStyle='#fff';og.textBaseline='middle';
-  var fs=th*.80;og.font='700 '+fs+'px KMT,"Segoe UI Historic","Noto Sans Egyptian Hieroglyphs",Georgia,serif';
+  var fs=th*.80;og.font='700 '+fs+'px "Hiragino Mincho ProN","Yu Mincho",YuMincho,"Songti SC","Noto Serif CJK JP","Source Han Serif SC",Georgia,serif';
   var chars=TITLE_CHARS,sp=fs*.24;
   var wdt=chars.map(function(c){return og.measureText(c).width;});
   var tot=wdt.reduce(function(a,b){return a+b;},0)+sp*(chars.length-1);
-  /* 圣书体四字连排比拉丁四字宽，原尺寸会溢出画布：超宽则等比缩字号重量 */
-  if(tot>tw*.96){fs*=tw*.96/tot;og.font='700 '+fs+'px KMT,"Segoe UI Historic","Noto Sans Egyptian Hieroglyphs",Georgia,serif';sp=fs*.24;
+  /* 片名字数一多就会溢出画布：超宽则等比缩字号 */
+  if(tot>tw*.96){fs*=tw*.96/tot;og.font='700 '+fs+'px "Hiragino Mincho ProN","Yu Mincho",YuMincho,"Songti SC","Noto Serif CJK JP","Source Han Serif SC",Georgia,serif';sp=fs*.24;
     wdt=chars.map(function(c){return og.measureText(c).width;});
     tot=wdt.reduce(function(a,b){return a+b;},0)+sp*(chars.length-1);}
   var x0=(tw-tot)/2;
@@ -3084,11 +3084,11 @@ function menuText(){
   og.fillStyle='#000';og.fillRect(0,0,tw,th);
   og.fillStyle='#fff';og.textBaseline='middle';
   if(!KMT_READY){menuScatter();return;}     /* 字体未就绪先不出字，就绪回调会重建 */
-  var fs2=th*.80;og.font='700 '+fs2+'px KMT,"Segoe UI Historic","Noto Sans Egyptian Hieroglyphs",Georgia,serif';
+  var fs2=th*.80;og.font='700 '+fs2+'px "Hiragino Mincho ProN","Yu Mincho",YuMincho,"Songti SC","Noto Serif CJK JP","Source Han Serif SC",Georgia,serif';
   var chars=TITLE_CHARS,sp=fs2*.24;
   var wdt=chars.map(function(c){return og.measureText(c).width;});
   var tot=wdt.reduce(function(a,b){return a+b;},0)+sp*(chars.length-1);
-  if(tot>tw*.96){fs2*=tw*.96/tot;og.font='700 '+fs2+'px KMT,"Segoe UI Historic","Noto Sans Egyptian Hieroglyphs",Georgia,serif';sp=fs2*.24;
+  if(tot>tw*.96){fs2*=tw*.96/tot;og.font='700 '+fs2+'px "Hiragino Mincho ProN","Yu Mincho",YuMincho,"Songti SC","Noto Serif CJK JP","Source Han Serif SC",Georgia,serif';sp=fs2*.24;
     wdt=chars.map(function(c){return og.measureText(c).width;});
     tot=wdt.reduce(function(a,b){return a+b;},0)+sp*(chars.length-1);}
   var x0=(tw-tot)/2;
