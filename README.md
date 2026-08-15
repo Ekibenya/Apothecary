@@ -4,8 +4,6 @@
 
 **THE APOTHECARY DIARIES**
 
-*免安装的 AI 文字角色扮演游戏 —— 忠于日向夏原作小说与动画*
-
 </div>
 
 ---
