@@ -2526,94 +2526,341 @@ function terrainDraw(t){
 /* ================= cards (360° ring carousel) ================ */
 var track=$('#track'),cards=[];
 
-/* ---- particle columns: 14 classical orders, one per opening ---- */
-/* 柱式表。开局从十六局加到二十局之后，环上是 1+20＝21 张卡，
-   而这张表原本只有十七项——第 17 项往后 ORDERS[i] 是 undefined，
-   colPts 的 switch 一条都不命中，最后四张卡的粒子数组是空的（柱子整根不见）。
-   旧的十七种一个不动，只在后面接四种，并给 switch 补 default 兜底。 */
-var ORDERS=['CONDITOR','FOLD','ORIENTAL','CVRL','COON','SPHYNX','BRITANNIA',
-            'MANVL','PERSIA','ABYSSINIA','DEVON','SIBERIA','SINGAPVRA'];
-var FAM   =['LIBERA','FELIS','FELIS','FELIS','FELIS','FELIS','FELIS',
-            'FELIS','FELIS','FELIS','FELIS','FELIS','FELIS'];
+/* ---- particle architecture: one hall per opening ---- */
+/* 形制表。清《工程做法》把房子分大式、小式：大式有斗栱，小式没有；
+   屋顶又分等级，重檐庑殿最尊，歇山次之，再往下悬山、硬山。
+   这张表一格一座，顺序对着开局，最后一格之后 colPts 有 default 兜底，
+   将来开局加到多少张都不会再出现空卡。 */
+var ORDERS=['重檐庑殿','单檐歇山','硬山','悬山','四角攒尖','重檐歇山',
+            '楼阁','密檐塔','卷棚','八角攒尖','棂星门','盝顶','阙楼'];
+var FAM   =['大式','大式','小式','小式','小式','大式',
+            '大式','大式','小式','小式','大式','小式','大式'];
 /* deterministic RNG per column so layouts are stable across sessions */
 function colPts(i){
-  /* 品种粒子猫耳。不画头——一张卡就是一对猫耳，品种差异全在耳形：
-     折耳前扑、卷耳后翻、英短圆顶、兔狲低圆、缅因毛缨、无毛猫薄而巨。
-     每只耳带一圈内耳轮廓线。坐标制式不动：x/z ±0.15，y 0 落地 1 顶天，hi 亮点。 */
+  /* 粒子古建。中国房子认不认得出来，全在屋顶那两笔：
+     举折——屋面不是斜直线，越靠脊越陡，压出一条凹弧；
+     起翘——四角檐口往上翻、往外挑。这两笔对了，剩下的都是配料。
+     一律 B＝面阔的一半（沿 x，正脊就搁在这条轴上），D＝进深的一半（沿 z，
+     屋面顺着它往上收）。B 必须大过 D，不然正脊收成一个点，庑殿就塌成攒尖了。
+     坐标制式不动：x/z 贴着地面那圈虚线椭圆，y 0 落地。 */
   var seed=i*7.31+3.7;
   function rnd(){seed=Math.sin(seed*127.1+311.7)*43758.5453;return seed-Math.floor(seed);}
   var pts=[];
-  function push(x,y,z,hi){pts.push({x:x,y:y,z:z,hi:hi||rnd()<.05});}
-  function bend(o,t,y,z){                      /* 折耳/卷耳共用的耳尖弯折 */
-    if(o.fold&&t>0.58){var q=(t-0.58)*3.2,hy=0.58*o.h,dy=y-hy;
-      y=hy+dy*Math.cos(q*1.5);z+=dy*Math.sin(q*1.5)+0.012;}
-    if(o.curl&&t>0.62){var q2=(t-0.62)*3.0,hy2=0.62*o.h,dy2=y-hy2;
-      y=hy2+dy2*Math.cos(q2*1.6);z-=dy2*Math.sin(q2*1.6);}
-    return [y,z];
+  var OX=0,OZ=0;                                  /* 画笔偏移：整组构件挪位用 */
+  function at(x,z){OX=x;OZ=z;}
+  function push(x,y,z,hi){pts.push({x:x+OX,y:y,z:z+OZ,hi:hi||rnd()<.05});}
+  function seg(n,a,b,j,hr){                       /* 两点之间撒一条 */
+    for(var k=0;k<n;k++){var t=rnd();j=j||0;
+      push(a[0]+(b[0]-a[0])*t+(rnd()-.5)*j, a[1]+(b[1]-a[1])*t+(rnd()-.5)*j,
+           a[2]+(b[2]-a[2])*t+(rnd()-.5)*j, rnd()<(hr||0));}
   }
-  function shape(o,t){                         /* 耳宽随高度收束；圆耳把尖收成圆顶 */
-    var w=o.wb*(1-t*(o.round?0.60:0.90));
-    var y=t*o.h;
-    if(o.round&&t>0.7){var tt=(t-0.7)/0.3;
-      y=0.7*o.h+Math.sin(tt*Math.PI/2)*0.3*o.h*0.9;
-      w*=1-tt*0.5;}
-    return [w,y];
-  }
-  function ear(n,sd,o){                        /* 一只耳。sd=±1 */
-    var la=(o.lean||0),cs=Math.cos(la),sn=Math.sin(la)*sd;
-    function put(u,y,z,hi){u+=sd*y*(o.sk||0);   /* 剪切：耳尖朝外上斜，内缘立得住——猫耳不是山 */
-      push(o.bx*sd+u*cs+y*sn, o.by+y*cs-u*sn, z, hi);}
-    for(var k=0;k<n;k++){                      /* 耳体：满填充，边缘更密 */
-      var t=rnd(),sw=shape(o,t),w=sw[0],yy=sw[1];
-      var u=(rnd()*2-1);u=(u<0?-1:1)*Math.pow(Math.abs(u),.62)*w/2;
-      var z=(rnd()*2-1)*(o.zth||0.030)*(1-t*0.7);
-      var bz=bend(o,t,yy,z);
-      put(u,bz[0],bz[1]);
-    }
-    for(var k2=0;k2<(n*0.5|0);k2++){           /* 内耳：0.52 倍的轮廓线，一圈 */
-      var t2=rnd(),sw2=shape(o,t2),w2=sw2[0]*.52,y2=sw2[1]*.52+o.h*.10;
-      var edge=rnd()<.5?-1:1;
-      var u2=edge*w2/2*(0.92+rnd()*.16);
-      if(t2>.9)u2*=rnd();                       /* 靠尖处闭合 */
-      var bz2=bend(o,t2*.52+.10,y2,.012);
-      put(u2,bz2[0],bz2[1],rnd()<.12);
-    }
-    if(o.fz)for(var k3=0;k3<o.fz;k3++){        /* 长毛耳：沿外缘炸毛 */
-      var t3=rnd(),sw3=shape(o,t3),w3=sw3[0],y3=sw3[1];
-      var edge3=rnd()<.5?-1:1;
-      var u3=edge3*(w3/2+rnd()*.020);
-      var bz3=bend(o,t3,y3,(rnd()-.5)*.03);
-      put(u3,bz3[0],bz3[1]);
-    }
-    if(o.tuft){                                /* 猞猁耳缨：耳尖冒一小簇 */
-      var tx=o.h*sn+sd*o.h*(o.sk||0), ty=o.by+o.h*cs;
-      for(var q3=0;q3<30;q3++){var tt2=rnd();
-        push(o.bx*sd+tx+(rnd()-.5)*.018+sd*tt2*.022, ty+tt2*.09, (rnd()-.5)*.018, tt2>.45);}
+  function ring(n,X,Z,y,j,hr){                    /* 平面上一圈矩形 */
+    for(var k=0;k<n;k++){
+      var t=rnd()*2*(X+Z),x,z;
+      if(t<2*X){x=(t/X-1)*X;z=(rnd()<.5?-1:1)*Z;}
+      else{z=((t-2*X)/Z-1)*Z;x=(rnd()<.5?-1:1)*X;}
+      j=j||0;push(x+(rnd()-.5)*j,y+(rnd()-.5)*j,z+(rnd()-.5)*j,rnd()<(hr||0));
     }
   }
-  /* 品种参数：h 耳高，wb 基宽，bx 双耳横距，by 耳根高度，lean 外倾，
-     round 圆耳，fold 折耳，curl 卷耳，tuft 耳缨，fz 炸毛，zth 耳厚 */
-  var B={
-  CONDITOR:  {h:.52,wb:.34,bx:.185,by:.16,lean:.12,sk:.03,zth:.038},
-  FOLD:      {h:.36,wb:.36,bx:.195,by:.20,lean:.08,sk:.02,fold:1,zth:.046},
-  ORIENTAL:  {h:.62,wb:.34,bx:.185,by:.11,lean:.10,sk:.03,zth:.034},
-  CVRL:      {h:.50,wb:.33,bx:.180,by:.16,lean:.12,sk:.03,curl:1,zth:.038},
-  COON:      {h:.55,wb:.35,bx:.190,by:.13,lean:.12,sk:.03,tuft:1,fz:120,zth:.042},
-  SPHYNX:    {h:.56,wb:.34,bx:.175,by:.12,lean:.10,sk:.03,zth:.020},
-  BRITANNIA: {h:.40,wb:.34,bx:.190,by:.19,lean:.13,sk:.02,round:1,zth:.046},
-  MANVL:     {h:.30,wb:.33,bx:.200,by:.21,lean:.16,sk:.02,round:1,fz:150,zth:.044},
-  PERSIA:    {h:.36,wb:.31,bx:.175,by:.19,lean:.11,sk:.02,round:1,fz:170,zth:.040},
-  ABYSSINIA: {h:.56,wb:.35,bx:.190,by:.12,lean:.11,sk:.03,zth:.034},
-  DEVON:     {h:.48,wb:.36,bx:.190,by:.13,lean:.13,sk:.03,zth:.032},
-  SIBERIA:   {h:.46,wb:.33,bx:.180,by:.16,lean:.12,sk:.03,tuft:1,fz:140,zth:.042},
-  SINGAPVRA: {h:.54,wb:.30,bx:.165,by:.12,lean:.10,sk:.03,zth:.032}
-  };
-  var o=B[ORDERS[i]]||B.CONDITOR;
-  ear(560,-1,o);ear(560,1,o);
-  if(ORDERS[i]==='CONDITOR'){                  /* 铸局：双耳之间一缕螺旋星火示「起造」 */
-    for(var k4=0;k4<90;k4++){var tf=rnd(),af=tf*Math.PI*5.6;
-      var rf=.014+.056*(1-tf);
-      push(rf*Math.cos(af),.30+tf*.42,rf*Math.sin(af),tf>.5);}
+  function jz(s,c){return Math.pow(s,c||1.5);}    /* 举折曲线 */
+  function wing(cn,s,o){                          /* 翼角：近角才翘，越到脊越收 */
+    var c=Math.max(0,Math.min(1,(cn-.42)/.58));
+    var f=(1-s)*Math.pow(c,1.8);
+    return [(o.up||0)*f,(o.out||0)*f];
+  }
+
+  /* ── 台基 ───────────────────────────────────────────────────────── */
+  function podium(o){
+    var X=o.X,Z=o.Z,h=o.h,n=o.n||150;
+    ring((n*.42)|0,X,Z,h,.004,.16);               /* 阶条石：上沿要实，房子才压得住 */
+    ring((n*.16)|0,X,Z,h*.34,.004,.04);           /* 土衬 */
+    for(var k=0;k<(n*.30|0);k++){                 /* 陡板：侧脸 */
+      var t=rnd()*2*(X+Z),x,z;
+      if(t<2*X){x=(t/X-1)*X;z=(rnd()<.5?-1:1)*Z;}
+      else{z=((t-2*X)/Z-1)*Z;x=(rnd()<.5?-1:1)*X;}
+      push(x,rnd()*h,z);
+    }
+    for(var k2=0;k2<(n*.12|0);k2++)               /* 踏跺：正面下来几级 */
+      push((rnd()*2-1)*X*.30, h*(1-Math.floor(rnd()*4)/4), Z+Math.floor(rnd()*4)*.011+.005, rnd()<.06);
+  }
+
+  /* ── 柱列 ───────────────────────────────────────────────────────── */
+  function pillars(o){
+    var X=o.X,Z=o.Z,y0=o.y0,y1=o.y1,cols=o.cols||5,n=o.n||180,spots=[];
+    for(var a=0;a<cols;a++){var f=cols<2?0:(a/(cols-1)*2-1);
+      spots.push([f*X,Z]);spots.push([f*X,-Z]);}
+    for(var b=1;b<cols-1;b++){var g=(b/(cols-1)*2-1);
+      spots.push([X,g*Z]);spots.push([-X,g*Z]);}
+    for(var k=0;k<n;k++){
+      var p=spots[(rnd()*spots.length)|0],t=rnd(),lean=1-t*.045;   /* 侧脚：柱子略朝里倾 */
+      push(p[0]*lean+(rnd()-.5)*.004*(1-t*.4), y0+(y1-y0)*t,
+           p[1]*lean+(rnd()-.5)*.004*(1-t*.4), rnd()<.05);
+    }
+    seg((n*.22)|0,[-X,y1,Z],[X,y1,Z],.005,.10);   /* 阑额：把柱头连起来 */
+    seg((n*.22)|0,[-X,y1,-Z],[X,y1,-Z],.005,.10);
+  }
+
+  /* ── 斗栱：大式才有，一朵一朵顶在檐下 ──────────────────────────── */
+  function brackets(o){
+    var X=o.X,Z=o.Z,y=o.y,n=o.n||13,per=o.per||6,spots=[];
+    for(var a=0;a<n;a++){var f=(a/(n-1)*2-1);spots.push([f*X,Z,0]);spots.push([f*X,-Z,0]);}
+    var m=Math.max(2,(n*Z/X)|0);
+    for(var b=1;b<m-1;b++){var g=(b/(m-1)*2-1);spots.push([X,g*Z,1]);spots.push([-X,g*Z,1]);}
+    for(var k=0;k<spots.length;k++){
+      var p=spots[k];
+      for(var q=0;q<per;q++){                     /* 一朵：横竖各出几跳 */
+        var u=(rnd()*2-1)*.011,v=rnd()*.020;
+        push(p[0]+u*(p[2]?.35:1), y+v, p[1]+u*(p[2]?1:.35), rnd()<.12);
+      }
+    }
+  }
+
+  /* ── 屋面：庑殿／歇山／悬山／硬山／卷棚／盝顶通用 ───────────────
+     s 从檐口 0 收到脊 1：进深方向往里收，高按举折抬。
+     hip=1 四面坡（庑殿），再给 xie 就是歇山（下半收山、上半山花）；
+     hip=0 两面坡（悬山硬山），juan 是卷棚，top 截住不封顶就是盝顶。 */
+  function roof(o){
+    var B=o.B,D=o.D,ye=o.ye,yr=o.yr,dy=yr-ye,cur=o.cur;
+    var Br=(o.Br!==undefined)?o.Br:(o.hip?Math.max(B*.16,B-D*.92):B);
+    var xie=o.xie||0,sTop=o.top||1;
+    function Xof(s){
+      if(!o.hip)return B;
+      var t=xie?Math.min(s,xie)/xie:s;
+      return B+(Br-B)*t;
+    }
+    for(var k=0;k<(o.n||230);k++){
+      var s=Math.pow(rnd(),1.6)*sTop;
+      var Zs=D*(1-s*(o.juan?.84:1)),Xs=Xof(s),y=ye+dy*jz(s,cur);
+      var sg,x,z,cn,ox=0,oz=0;
+      if(!o.hip||rnd()<Xs/(Xs+Zs+1e-6)){          /* 前后坡 */
+        sg=rnd()<.5?-1:1;z=sg*Zs;x=(rnd()*2-1)*Xs;cn=Math.abs(x)/(Xs+1e-6);oz=sg;
+      }else{                                      /* 两山那两片戗坡，只有庑殿歇山才有 */
+        sg=rnd()<.5?-1:1;x=sg*Xs;z=(rnd()*2-1)*Zs;cn=Math.abs(z)/(Zs+1e-6);ox=sg;
+      }
+      var wg=wing(cn,s,o);
+      push(x+ox*wg[1], y+wg[0], z+oz*wg[1]);
+    }
+    /* 檐口：全座最密的一条线，起翘就是从这儿读出来的 */
+    var X0=Xof(0);
+    for(var k2=0;k2<(o.ne||130);k2++){
+      var sg2,x2,z2,cn2,ox2=0,oz2=0;
+      if(!o.hip||rnd()<X0/(X0+D)){sg2=rnd()<.5?-1:1;z2=sg2*D;x2=(rnd()*2-1)*X0;cn2=Math.abs(x2)/X0;oz2=sg2;}
+      else{sg2=rnd()<.5?-1:1;x2=sg2*X0;z2=(rnd()*2-1)*D;cn2=Math.abs(z2)/D;ox2=sg2;}
+      var wg2=wing(cn2,0,o);
+      push(x2+ox2*wg2[1], ye+wg2[0], z2+oz2*wg2[1], rnd()<.13);
+    }
+    if(o.top){                                    /* 盝顶：顶上是平的，围一圈围脊 */
+      var Xt=Xof(sTop),Zt=D*(1-sTop),yt=ye+dy*jz(sTop,cur);
+      ring(o.nr||70,Xt,Zt,yt,.005,.18);
+      for(var q0=0;q0<36;q0++)push((rnd()*2-1)*Xt,yt-.004,(rnd()*2-1)*Zt);
+    }else if(o.juan){                             /* 卷棚：没有正脊，两坡在顶上滚过去 */
+      for(var q=0;q<(o.nr||70);q++){var a=rnd()*Math.PI;
+        push((rnd()*2-1)*Br, yr-.005+Math.sin(a)*.013, Math.cos(a)*D*.15, rnd()<.12);}
+    }else{                                        /* 正脊，两头鸱吻 */
+      seg(o.nr||76,[-Br,yr,0],[Br,yr,0],.007,.18);
+      for(var e=-1;e<=1;e+=2)
+        for(var q2=0;q2<14;q2++){var t2=rnd();
+          push(e*(Br+.005+t2*.013), yr+t2*.032, (rnd()-.5)*.014, t2>.45);}
+    }
+    /* 垂脊／戗脊：从脊头落到檐角那四条，形制的骨架 */
+    var C=[[-1,-1],[-1,1],[1,-1],[1,1]];
+    for(var ci=0;ci<4;ci++)
+      for(var q3=0;q3<(o.nh||50);q3++){
+        var s3=rnd()*sTop,Xs3=Xof(s3),Zs3=D*(1-s3),y3=ye+dy*jz(s3,cur),wg3=wing(1,s3,o);
+        push(C[ci][0]*(Xs3+wg3[1]), y3+wg3[0], C[ci][1]*(Zs3+wg3[1]), rnd()<.18);
+      }
+    if(o.hip&&xie)for(var e2=-1;e2<=1;e2+=2){     /* 歇山：收山之上一面山花 */
+      for(var q4=0;q4<(o.ng||46);q4++){
+        var s4=xie+(1-xie)*rnd();
+        push(e2*Br, ye+dy*jz(s4,cur), (rnd()<.5?-1:1)*D*(1-s4), rnd()<.14);
+      }
+      for(var q5=0;q5<(o.nf||30);q5++){
+        var u5=(rnd()*2-1),s5=xie+(1-xie)*(1-Math.abs(u5))*rnd();
+        push(e2*Br, ye+dy*jz(s5,cur)-rnd()*.014, u5*D*(1-s5));
+      }
+    }
+    if(!o.hip)for(var e3=-1;e3<=1;e3+=2){         /* 悬山／硬山：两端是山花 */
+      var xx=e3*(B+(o.xuan||0));
+      for(var q6=0;q6<(o.nh2||56);q6++){          /* 博风板：顺着屋面斜下来 */
+        var s6=rnd(),Zs6=D*(1-s6);
+        push(xx, ye+dy*jz(s6,cur), (rnd()<.5?-1:1)*Zs6, rnd()<.16);
+      }
+      for(var q7=0;q7<(o.nf||40);q7++){           /* 山花 */
+        var u7=(rnd()*2-1),tp=ye+dy*jz(1-Math.abs(u7),cur);
+        push(xx, ye+(tp-ye)*rnd(), u7*D);
+      }
+      if(o.xuan)for(var q8=0;q8<12;q8++)          /* 悬山：挑出山墙的檩头 */
+        push(xx+e3*.006, ye+.004+rnd()*dy*.86, (rnd()*2-1)*D*.86, rnd()<.3);
+    }
+  }
+
+  /* ── 攒尖：正多边形收成一个尖，顶上一颗宝顶 ─────────────────────── */
+  function pyramid(o){
+    var S=o.sides||4,R=o.R,ye=o.ye,yr=o.yr,dy=yr-ye,step=2*Math.PI/S,a0=o.a0||0;
+    function rad(a){var t=((a-a0)%step+step)%step;
+      return R*Math.cos(Math.PI/S)/Math.cos(t-Math.PI/S);}
+    function cor(a){var t=((a-a0)%step+step)%step;
+      return Math.abs(t-Math.PI/S)/(Math.PI/S);}
+    for(var k=0;k<(o.n||250);k++){
+      var s=Math.pow(rnd(),1.6),a=rnd()*Math.PI*2;
+      var rr=rad(a)*(1-s),y=ye+dy*jz(s,o.cur),wg=wing(cor(a),s,o);
+      push(Math.cos(a)*(rr+wg[1]), y+wg[0], Math.sin(a)*(rr+wg[1]));
+    }
+    for(var k2=0;k2<(o.ne||120);k2++){            /* 檐口一圈 */
+      var a2=rnd()*Math.PI*2,wg2=wing(cor(a2),0,o);
+      push(Math.cos(a2)*(rad(a2)+wg2[1]), ye+wg2[0], Math.sin(a2)*(rad(a2)+wg2[1]), rnd()<.13);
+    }
+    for(var c=0;c<S;c++){                          /* 每个角一条垂脊 */
+      var ac=a0+c*step;
+      for(var q=0;q<(o.nh||34);q++){
+        var s3=rnd(),rr3=rad(ac)*(1-s3),y3=ye+dy*jz(s3,o.cur),wg3=wing(1,s3,o);
+        push(Math.cos(ac)*(rr3+wg3[1]), y3+wg3[0], Math.sin(ac)*(rr3+wg3[1]), rnd()<.18);
+      }
+    }
+    for(var q2=0;q2<(o.nb||34);q2++){              /* 宝顶 */
+      var t4=rnd(),a4=rnd()*Math.PI*2,rb=.014*Math.sin(t4*Math.PI)+.003;
+      push(Math.cos(a4)*rb, yr+t4*.052, Math.sin(a4)*rb, t4>.6);
+    }
+  }
+
+  /* ── 形制 ───────────────────────────────────────────────────────── */
+  var K=ORDERS[i]||'硬山';
+  if(K==='重檐庑殿'){                              /* 最尊：太和殿这一档 */
+    podium({X:.196,Z:.120,h:.082,n:170});
+    pillars({X:.156,Z:.088,y0:.082,y1:.232,cols:6,n:150});
+    brackets({X:.158,Z:.090,y:.232,n:12,per:5});
+    roof({B:.194,D:.116,ye:.256,yr:.336,hip:1,cur:1.55,up:.030,out:.020,
+          n:130,ne:86,nr:44,nh:28});               /* 下檐 */
+    pillars({X:.120,Z:.062,y0:.336,y1:.436,cols:5,n:80});
+    brackets({X:.122,Z:.064,y:.436,n:9,per:5});
+    roof({B:.156,D:.090,ye:.456,yr:.582,hip:1,cur:1.5,up:.034,out:.022,
+          n:180,ne:100,nr:60,nh:38});              /* 上檐 */
+  }else if(K==='重檐歇山'){
+    podium({X:.190,Z:.116,h:.076,n:164});
+    pillars({X:.150,Z:.084,y0:.076,y1:.226,cols:6,n:146});
+    brackets({X:.152,Z:.086,y:.226,n:12,per:5});
+    roof({B:.188,D:.112,ye:.248,yr:.326,hip:1,xie:.52,cur:1.55,up:.034,out:.022,
+          n:126,ne:84,nr:42,nh:26,ng:30,nf:20});
+    pillars({X:.114,Z:.060,y0:.326,y1:.424,cols:5,n:78});
+    brackets({X:.116,Z:.062,y:.424,n:9,per:5});
+    roof({B:.150,D:.086,ye:.444,yr:.568,hip:1,xie:.50,cur:1.5,up:.038,out:.024,
+          n:170,ne:96,nr:56,nh:36,ng:40,nf:26});
+  }else if(K==='单檐歇山'){
+    podium({X:.194,Z:.118,h:.074,n:172});
+    pillars({X:.154,Z:.086,y0:.074,y1:.272,cols:6,n:186});
+    brackets({X:.156,Z:.088,y:.272,n:13,per:6});
+    roof({B:.192,D:.114,ye:.296,yr:.512,hip:1,xie:.50,cur:1.52,up:.038,out:.026,
+          n:270,ne:132,nr:76,nh:48,ng:50,nf:32});
+  }else if(K==='硬山'){                            /* 小式：山墙齐着檐砌到顶，不出挑 */
+    podium({X:.178,Z:.106,h:.056,n:150});
+    pillars({X:.142,Z:.078,y0:.056,y1:.266,cols:5,n:172});
+    for(var w1=0;w1<130;w1++){                     /* 山墙 */
+      var e1=rnd()<.5?-1:1,u1=(rnd()*2-1);
+      var tp1=.294+(.452-.294)*jz(1-Math.abs(u1),1.45);
+      push(e1*.176,rnd()*tp1,u1*.104,rnd()<.05);
+    }
+    roof({B:.176,D:.104,ye:.294,yr:.452,hip:0,cur:1.45,up:0,out:0,xuan:0,
+          n:290,ne:124,nr:70,nh:40,nh2:56,nf:0});
+  }else if(K==='悬山'){                            /* 小式：檩子挑出山墙外 */
+    podium({X:.178,Z:.104,h:.056,n:150});
+    pillars({X:.142,Z:.076,y0:.056,y1:.266,cols:5,n:172});
+    roof({B:.176,D:.102,ye:.294,yr:.456,hip:0,cur:1.45,up:0,out:0,xuan:.016,
+          n:290,ne:126,nr:72,nh:40,nh2:58,nf:26});
+  }else if(K==='卷棚'){                            /* 没有正脊，两坡在顶上滚过去 */
+    podium({X:.176,Z:.104,h:.054,n:148});
+    pillars({X:.140,Z:.076,y0:.054,y1:.258,cols:5,n:168});
+    roof({B:.174,D:.102,ye:.286,yr:.436,hip:0,juan:1,cur:1.42,xuan:.012,
+          n:290,ne:126,nr:76,nh:40,nh2:58,nf:24});
+  }else if(K==='盝顶'){                            /* 顶上一方平的，围脊圈起来 */
+    podium({X:.174,Z:.114,h:.060,n:150});
+    pillars({X:.138,Z:.084,y0:.060,y1:.264,cols:5,n:170});
+    roof({B:.172,D:.112,ye:.290,yr:.470,hip:1,cur:1.4,up:.028,out:.018,top:.58,
+          n:240,ne:120,nr:74,nh:44});
+  }else if(K==='四角攒尖'){
+    podium({X:.136,Z:.136,h:.052,n:130});
+    pillars({X:.106,Z:.106,y0:.052,y1:.270,cols:2,n:120});
+    pyramid({sides:4,a0:Math.PI/4,R:.178,ye:.292,yr:.512,cur:1.5,up:.046,out:.030,
+             n:280,ne:126,nh:44,nb:38});
+  }else if(K==='八角攒尖'){
+    podium({X:.134,Z:.134,h:.050,n:130});
+    pillars({X:.102,Z:.102,y0:.050,y1:.264,cols:3,n:136});
+    pyramid({sides:8,a0:Math.PI/8,R:.174,ye:.286,yr:.492,cur:1.48,up:.038,out:.026,
+             n:280,ne:124,nh:24,nb:36});
+  }else if(K==='楼阁'){                            /* 两层，中间一道平座 */
+    podium({X:.174,Z:.108,h:.070,n:150});
+    pillars({X:.136,Z:.080,y0:.070,y1:.226,cols:5,n:130});
+    brackets({X:.138,Z:.082,y:.226,n:10,per:5});
+    roof({B:.176,D:.110,ye:.246,yr:.302,hip:1,xie:.5,cur:1.5,up:.028,out:.018,
+          n:110,ne:74,nr:36,nh:22,ng:22,nf:14});   /* 腰檐 */
+    ring(74,.156,.094,.324,.005,.14);              /* 平座：一圈栏杆 */
+    for(var q9=0;q9<46;q9++)
+      push((rnd()*2-1)*.156,.324+rnd()*.024,(rnd()<.5?-1:1)*.094,rnd()<.12);
+    pillars({X:.122,Z:.070,y0:.348,y1:.492,cols:5,n:110});
+    brackets({X:.124,Z:.072,y:.492,n:9,per:5});
+    roof({B:.154,D:.094,ye:.512,yr:.656,hip:1,xie:.5,cur:1.5,up:.038,out:.026,
+          n:180,ne:100,nr:58,nh:38,ng:36,nf:24});
+  }else if(K==='密檐塔'){                          /* 一层塔身，上头密密叠着檐 */
+    podium({X:.150,Z:.150,h:.066,n:140});
+    for(var q10=0;q10<150;q10++){                  /* 塔身：第一层最高 */
+      var a10=rnd()*Math.PI*2,r10=.104*(1-rnd()*.06);
+      push(Math.cos(a10)*r10,.066+rnd()*.176,Math.sin(a10)*r10,rnd()<.06);
+    }
+    for(var t10=0;t10<8;t10++){                    /* 八重密檐，逐层收 */
+      var f10=1-t10*.072,yb=.250+t10*.052;
+      pyramid({sides:8,a0:Math.PI/8,R:.132*f10,ye:yb,yr:yb+.028,cur:1.35,
+               up:.018*f10,out:.012*f10,n:56,ne:44,nh:8,nb:0});
+    }
+    for(var q11=0;q11<64;q11++){                   /* 塔刹：相轮一串 */
+      var t11=rnd(),rr11=.016*(1-t11*.7)+.002,a11=rnd()*Math.PI*2;
+      push(Math.cos(a11)*rr11,.676+t11*.140,Math.sin(a11)*rr11,t11>.5);
+    }
+  }else if(K==='棂星门'){                          /* 三间四柱、柱头冲天的牌坊 */
+    var CX=[-.180,-.064,.064,.180];
+    for(var c12=0;c12<4;c12++){
+      for(var q12=0;q12<62;q12++){var t12=rnd();
+        push(CX[c12]+(rnd()-.5)*.008,.026+t12*.442,(rnd()-.5)*.016,rnd()<.06);}
+      for(var q13=0;q13<20;q13++)                  /* 夹杆石 */
+        push(CX[c12]+(rnd()-.5)*.022,rnd()*.074,(rnd()-.5)*.028);
+      for(var q14=0;q14<16;q14++){var t14=rnd();   /* 冲天柱头 */
+        push(CX[c12]+(rnd()-.5)*.007,.468+t14*.052,(rnd()-.5)*.012,t14>.5);}
+    }
+    for(var b12=0;b12<3;b12++){
+      var x0=CX[b12],x1=CX[b12+1],hi12=b12===1?.386:.330;
+      seg(48,[x0,hi12,0],[x1,hi12,0],.010,.12);    /* 上下额枋 */
+      seg(36,[x0,hi12-.052,0],[x1,hi12-.052,0],.008,.08);
+      for(var q15=0;q15<28;q15++)                  /* 花板 */
+        push(x0+(x1-x0)*rnd(),hi12-.052+rnd()*.052,(rnd()-.5)*.012);
+      at((x0+x1)/2,0);                             /* 每间顶上一座小楼 */
+      roof({B:(x1-x0)/2*.94,D:.028,ye:hi12+.014,yr:hi12+.056,hip:1,cur:1.45,
+            up:.018,out:.012,n:70,ne:52,nr:26,nh:14});
+      at(0,0);
+    }
+  }else if(K==='阙楼'){                            /* 母阙带子阙，一对夹着中间的路 */
+    for(var sd13=-1;sd13<=1;sd13+=2){
+      var bx=sd13*.116;
+      at(bx,0);
+      for(var q16=0;q16<140;q16++){var t16=rnd(); /* 母阙阙身：上头略收 */
+        push((rnd()*2-1)*.056*(1-t16*.10),.028+t16*.296,(rnd()*2-1)*.048*(1-t16*.10),rnd()<.05);}
+      ring(44,.062,.054,.028,.004,.10);
+      roof({B:.086,D:.076,ye:.332,yr:.392,hip:1,cur:1.5,up:.026,out:.018,
+            n:90,ne:60,nr:28,nh:20});
+      at(bx+sd13*.080,0);                          /* 子阙：矮一截，贴在外侧 */
+      for(var q17=0;q17<74;q17++){var t17=rnd();
+        push((rnd()*2-1)*.032,.028+t17*.184,(rnd()*2-1)*.030,rnd()<.05);}
+      roof({B:.052,D:.046,ye:.212,yr:.252,hip:1,cur:1.5,up:.018,out:.012,
+            n:52,ne:38,nr:16,nh:12});
+      at(0,0);
+    }
+  }else{                                           /* 兜底：开局再多也不会空卡 */
+    podium({X:.176,Z:.106,h:.054,n:148});
+    pillars({X:.140,Z:.078,y0:.054,y1:.262,cols:5,n:170});
+    roof({B:.174,D:.104,ye:.290,yr:.448,hip:0,cur:1.45,xuan:.012,
+          n:290,ne:124,nr:72,nh:40,nh2:58,nf:24});
+  }
+  if(i===0){                                       /* 铸局：正脊上一缕螺旋星火示「起造」 */
+    for(var k4=0;k4<80;k4++){var tf=rnd(),af=tf*Math.PI*5.6;
+      var rf=.012+.044*(1-tf);
+      push(rf*Math.cos(af),.612+tf*.292,rf*Math.sin(af),tf>.5);}
   }
   return pts;
 }
@@ -2634,7 +2881,7 @@ function buildCards(){
     var el=document.createElement('div');el.className='card';el.dataset.i=i;
     el.innerHTML=
       '<div class="cframe">'+
-        '<span class="ftag">'+(FAM[i]||'IGNOTA')+' ORDER // '+(ORDERS[i]||'ANONYMVS')+'</span>'+
+        '<span class="ftag">'+(FAM[i]||'小式')+' // '+(ORDERS[i]||'無名')+'</span>'+
         '<span class="fnum">'+(i===0?'SIG_LIBERA':'SIG_'+pad(i-1)+'/'+pad(N-2))+'</span>'+
         '<canvas></canvas>'+
       '</div>'+
