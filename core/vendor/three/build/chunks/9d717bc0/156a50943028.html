@@ -12554,30 +12554,61 @@ function railMapThumb(){
   GB_flush(g);
 }
 
-/* 三维那一枚的微缩。三维是 WebGL，宿主没开 preserveDrawingBuffer，
-   合成一过缓冲就被清了——在主循环里 drawImage 过去多半是一片黑。
-   所以拷完抽查几个点：真有像素就用，全黑就退回自己画一张地平线示意，
-   总好过挂一块死黑的方块。收起状态下画面本来就没有，直接画示意。 */
+/* 绘卷那一枚的微缩。这里原是三维时代留下的写法：从台上抓第一张画布，
+   drawImage(src,0,0,W,H) 整幅塞进 128×88。改成视觉小说以后，台上第一张
+   画布是**立绘**——竖构图的人物被硬压成横的，缩略窗里就是一张扁脸。
+   现在按台面原样合成：背景照它自己的 object-fit:cover 裁一次，立绘按各自
+   在台上的实际位置落进来，横竖两个方向共用同一个缩放系数——不拉伸。 */
 function rail3dThumb(){
   var c=document.querySelector('#arr3d .m3d');if(!c)return;
   var g=c.getContext('2d');if(!g)return;
   var W=c.width,H=c.height,live=false;
   g.clearRect(0,0,W,H);
   if(GAME.txOpen){
-    var hosts=['vnCast'],src=null,i,j;
-    for(i=0;i<hosts.length&&!src;i++){
-      var h=document.getElementById(hosts[i]);
-      if(!h)continue;
-      try{if(getComputedStyle(h).display==='none')continue;}catch(_){}
-      var cvs=h.querySelectorAll('canvas');
-      for(j=0;j<cvs.length;j++)if(cvs[j].width>1&&cvs[j].height>1){src=cvs[j];break;}
-    }
-    if(src){
-      try{g.drawImage(src,0,0,W,H);}catch(_){}
-      try{
-        var d=g.getImageData(0,0,W,H).data;
-        for(var k=0;k<d.length;k+=4*13){if(d[k]>8||d[k+1]>8||d[k+2]>8){live=true;break;}}
-      }catch(_){live=true;}      /* 画布被污染读不了：当它是活的，别退回示意 */
+    var isle=document.getElementById('vnIsle'),ir=null;
+    try{if(isle)ir=isle.getBoundingClientRect();}catch(_){}
+    if(ir&&ir.width>4&&ir.height>4){
+      /* 台面到缩略窗：一个统一的缩放系数（按短边取 cover），横竖同一个数，
+         比例才锁得住。分别按宽高各算一次，就是原先那张扁脸的来历。 */
+      var sc=Math.max(W/ir.width,H/ir.height);
+      var ox=(W-ir.width*sc)/2,oy=(H-ir.height*sc)/2;
+      /* 底：当前那张背景。台上是 object-fit:cover，这里照做一遍 */
+      var bg=null,bo=-1;
+      ['vnBgA','vnBgB'].forEach(function(id){
+        var im=document.getElementById(id);
+        if(!im||!im.getAttribute('src')||!im.naturalWidth)return;
+        var o=0;try{o=parseFloat(getComputedStyle(im).opacity)||0;}catch(_){o=1;}
+        if(o>bo){bo=o;bg=im;}
+      });
+      if(bg&&bo>.05){
+        var bs=Math.max(W/bg.naturalWidth,H/bg.naturalHeight);
+        var bw=bg.naturalWidth*bs,bh=bg.naturalHeight*bs;
+        try{g.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh);live=true;}catch(_){}
+      }
+      /* 立绘：按各自在台上的位置与大小落进来，共用上面那个 sc */
+      var host=document.getElementById('vnCast');
+      if(host)Array.prototype.forEach.call(host.querySelectorAll('canvas'),function(sp){
+        if(!(sp.width>1&&sp.height>1))return;
+        var o2=1;try{o2=parseFloat(getComputedStyle(sp).opacity);}catch(_){}
+        if(!(o2>.05))return;
+        var r=null;try{r=sp.getBoundingClientRect();}catch(_){}
+        if(!r||r.width<1||r.height<1)return;
+        try{
+          g.globalAlpha=Math.min(1,o2);
+          g.drawImage(sp,ox+(r.left-ir.left)*sc,oy+(r.top-ir.top)*sc,
+                         r.width*sc,r.height*sc);
+          g.globalAlpha=1;live=true;
+        }catch(_){g.globalAlpha=1;}
+      });
+      /* 罩子：台上那层上下压边，缩略窗里也带一道，才认得出是同一幅 */
+      if(live){
+        var wg=g.createLinearGradient(0,0,0,H);
+        wg.addColorStop(0,CO('rgba(0,0,0,.55)'));
+        wg.addColorStop(.30,CO('rgba(0,0,0,.5)'));
+        wg.addColorStop(.70,CO('rgba(0,0,0,.5)'));
+        wg.addColorStop(1,CO('rgba(0,0,0,.55)'));
+        g.globalAlpha=.5;g.fillStyle=wg;g.fillRect(0,0,W,H);g.globalAlpha=1;
+      }
     }
   }
   if(live)return;
