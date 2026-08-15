@@ -1,0 +1,21 @@
+{
+  "name": "apothecary",
+  "version": "1.0.0",
+  "description": "薬屋のひとりごと - Three.js based interactive storytelling experience",
+  "type": "module",
+  "scripts": {
+    "dev": "python rwserve.py",
+    "build": "echo 'Static site - no build required'",
+    "lint": "echo 'No linter configured'"
+  },
+  "keywords": [
+    "three.js",
+    "interactive",
+    "storytelling"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  }
+}
